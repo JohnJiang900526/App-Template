@@ -1066,14 +1066,9 @@ function AppForm() {
                     '<input class="hide" name="checkbox" type="checkbox" >' +
                     '</div>' +
                     '<div class="mui-media-body">' +
-                    '<p class="mui-ellipsis list-title">' +
-                    '<span>' + title + '</span>' +
-                    '</p>' +
+                    '<p class="mui-ellipsis list-title">' + title + '</p>' +
                     '<div class="list-units">' +
-                    '<div class="list-unit mui-ellipsis">' + left + '</div>' +
-                    '<div class="list-unit mui-ellipsis">' + center + '</div>' +
-                    '<div class="list-unit mui-ellipsis">' + right + '</div>' +
-                    '</div>' +
+                    left + center + right + '</div>' +
                     '</div>' +
                     '</div>' +
                     '</div>' +

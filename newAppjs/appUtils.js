@@ -240,28 +240,51 @@ var Util = {
         if (htmlparams[type]) {
             if (htmlparams[type].value != "") {
                 var format = htmlparams[type].format;
-                //普通文本
-                if (!format) {
-                    result = row[htmlparams[type].value];
-                } else if (format == "combobox") {
-                    var comb = comboboxdata[htmlparams.gridid + "." + htmlparams[type].value];
-                    if (comb) {
-                        var ds = comb.Data;
-                        var v = row[htmlparams[type].value];
-                        for (var i = 0; i < ds.length; i++) {
-                            var d = ds[i];
-                            if (d[comb.ValueField] == v) {
-                                result = d[comb.TextField];
-                                break;
+                var formatType = format;
+
+                // 判断是否为number类型
+                if (format.indexOf("n") > -1 || format.indexOf("c") > -1 || format.indexOf("p") > -1) {
+                    formatType = "number";
+                }
+
+                // 判断是否为日期类型
+                if (format.indexOf("yyyy") > -1) {
+                    formatType = "datePicker";
+                }
+
+                // 判断是否为下拉框类型
+                if (format == "combobox") {
+                    formatType = "combobox";
+                }
+
+                switch (formatType) {
+                    case 'combobox':
+                        var comb = comboboxdata[htmlparams.gridid + "." + htmlparams[type].value];
+                        if (comb) {
+                            var ds = comb.Data;
+                            var v = row[htmlparams[type].value];
+                            for (var i = 0; i < ds.length; i++) {
+                                var d = ds[i];
+                                if (d[comb.ValueField] == v) {
+                                    result = d[comb.TextField];
+                                    break;
+                                }
                             }
                         }
-                    }
-                } else if (format.indexOf("n") > -1 || format.indexOf("c") > -1 || format.indexOf("p") > -1) {
-                    //数字
-                    result = new Number(row[htmlparams[type].value]);
-                } else if (format.indexOf("y") > -1) {
-                    //日期
-                    result = that._formatDate(row[htmlparams[type].value], format);
+                        break;
+                    case 'number':
+                        var typeOf = typeof row[htmlparams[type].value];
+                        if (typeOf == "number") {
+                            result = row[htmlparams[type].value]
+                        } else {
+                            result = new Number(row[htmlparams[type].value]);
+                        }
+                        break;
+                    case 'datePicker':
+                        result = that._formatDate(row[htmlparams[type].value], format);
+                        break;
+                    default:
+                        result = row[htmlparams[type].value];    
                 }
             }
 
