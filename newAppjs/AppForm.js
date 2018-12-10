@@ -649,14 +649,16 @@ function AppForm() {
                 if (key == "RegDate" || key == "UpdDate") {
                     obj[key] = that._formatDate(obj[key]);
                 }
-
                 obj[key] = that.formatStatus(KeyWord, key, obj[key]);
-
+                var mainDom = form.find("#" + KeyWord + "_" + key);
                 //在主表中input或者textarea元素上的id设置规则是 KeyWord + "_" + key的形式
                 //原来的KeyWord + "." + key形式的，废弃
-                if (form.find("#" + KeyWord + "_" + key).hasClass("btn-picker")) {
-                    obj[key] = that._formatDate(obj[key]);
+
+                if (mainDom.size() > 0 && mainDom.hasClass("btn-picker")) {
+                    var formatTime = mainDom.attr("data-format");
+                    obj[key] = that._formatDate(obj[key], formatTime);
                 }
+
                 form.find("#" + KeyWord + "_" + key).val(obj[key]);
             }
         },
@@ -1049,10 +1051,10 @@ function AppForm() {
 
             for (var i = 0; i < data.length; i++) {
                 item = data[i];
-                title = that.getTableTypeResult(htmlparams, item, "title");
-                left = that.getTableTypeResult(htmlparams, item, "left");
-                right = that.getTableTypeResult(htmlparams, item, "right");
-                center = that.getTableTypeResult(htmlparams, item, "center");
+                title = Util.getTableTypeResult(htmlparams, item, "title");
+                left = Util.getTableTypeResult(htmlparams, item, "left");
+                right = Util.getTableTypeResult(htmlparams, item, "right");
+                center = Util.getTableTypeResult(htmlparams, item, "center");
 
                 html += '<li data-id="' + item.Id + '" data-idfield="' + htmlparams.idfield + '" class="mui-table-view-cell">' +
                     '<div class="mui-slider-right mui-disabled">' +
@@ -1107,12 +1109,20 @@ function AppForm() {
                         if (row) {
                             for (var key in row) {
                                 var value = that.encodeComboBoxData(htmlparams.gridid, key, row[key]);
+                                var childDom = $("#" + htmlparams.gridid + "_" + key);
+
                                 if (value !== row[key]) {
                                     if (formConfig.table_state != "added") {
-                                        $("#" + htmlparams.gridid + "_" + key).prop("readonly", true);
+                                        childDom.prop("readonly", true);
                                     }
                                 }
-                                $("#" + htmlparams.gridid + "_" + key).val(value);
+
+                                if (childDom.hasClass("btn-picker")) {
+                                    var formatTime = childDom.attr("data-format");
+                                    value = that._formatDate(value, formatTime);
+                                }
+
+                                childDom.val(value);
                             }
                         }
 

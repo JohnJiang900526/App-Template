@@ -86,7 +86,7 @@
                 </div>
                 <div class="mui-input-row">
                     <label class="mui-label-text">录入日期</label>
-                    <input id='PS_IncomeContract_RegDate' name="RegDate" type="text" class="btn-picker mui-input" value="" placeholder="选择日期 ...">
+                    <input id='PS_IncomeContract_RegDate' data-format="yyyy-MM" name="RegDate" type="text" class="btn-picker mui-input" value="" placeholder="选择日期 ...">
                 </div>
             </form>
 
@@ -364,19 +364,23 @@
                         formid: "", //如果需要打开表单，表单的formid
                         title: {
                             value: "PayNodes", // title显示的字段
-                            format: ""
+                            format: "",
+                            name: '节点名称'
                         },
                         left: {
                             value: "PayType", // 左侧显示的字段
-                            format: "combobox" // 如果是下拉框，就设置combobox
+                            format: "combobox", // 如果是下拉框，就设置combobox,
+                            name: '节点类型'
                         },
                         center: {
                             value: "PayAmount", // 中间显示的字段
-                            format: ""
+                            format: "",
+                            name: '收款金额'
                         },
                         right: {
                             value: "PayDescription", // 右边显示的字段
-                            format: ""
+                            format: "",
+                            name: '节点描述'
                         }
                     }
                 }

@@ -199,5 +199,94 @@ var Util = {
         }
         return Base64.encode(Util.Base64Swhere(str));
     },
-    
+    // 自定义时间格式 ：format
+    // "yyyy-MM-dd HH:mm:ss";"yyyy-MM-dd-HH-mm-ss"
+    // "yyyy-MM-ddTHH:mm:ss" ....
+    _formatDate: function (time, format) {
+        var t = new Date(time);
+        if (t.getTime() == 0) {
+            t = new Date();
+        }
+
+        var tf = function (i) {
+            return (i < 10 ? '0' : '') + i;
+        };
+        if (!format) {
+            format = "yyyy-MM-dd";
+        }
+
+        return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (type) {
+            switch (type) {
+                case 'yyyy':
+                    return tf(t.getFullYear());
+                case 'MM':
+                    return tf(t.getMonth() + 1);
+                case 'mm':
+                    return tf(t.getMinutes());
+                case 'dd':
+                    return tf(t.getDate());
+                case 'HH':
+                    return tf(t.getHours());
+                case 'ss':
+                    return tf(t.getSeconds());
+            }
+        })
+    },
+    //获取子表上，行的标题数据
+    getTableTypeResult: function (htmlparams, row, type) {
+        var that = this;
+        var result = "";
+
+        if (htmlparams[type]) {
+            if (htmlparams[type].value != "") {
+                var format = htmlparams[type].format;
+                //普通文本
+                if (!format) {
+                    result = row[htmlparams[type].value];
+                } else if (format == "combobox") {
+                    var comb = comboboxdata[htmlparams.gridid + "." + htmlparams[type].value];
+                    if (comb) {
+                        var ds = comb.Data;
+                        var v = row[htmlparams[type].value];
+                        for (var i = 0; i < ds.length; i++) {
+                            var d = ds[i];
+                            if (d[comb.ValueField] == v) {
+                                result = d[comb.TextField];
+                                break;
+                            }
+                        }
+                    }
+                } else if (format.indexOf("n") > -1 || format.indexOf("c") > -1 || format.indexOf("p") > -1) {
+                    //数字
+                    result = new Number(row[htmlparams[type].value]);
+                } else if (format.indexOf("y") > -1) {
+                    //日期
+                    result = that._formatDate(row[htmlparams[type].value], format);
+                }
+            }
+
+            if (!result) {
+                result = "暂无";
+            } else {
+                result = result.replace("null", "");
+            }
+
+            var name = htmlparams[type].name;
+
+            switch (type) {
+                case 'title':
+                    return name ? '<span>' + name + ':' + result + '</span>' : '<span>' + result + '</span>';
+                case 'left':
+                    return name ? '<div class="list-unit mui-ellipsis">' + name + ':' + result + '</div>': '<div class="list-unit mui-ellipsis">' + result + '</div>';
+                case 'right':
+                    return name ? '<div class="list-unit mui-ellipsis">' + name + ':' + result + '</div>': '<div class="list-unit mui-ellipsis">' + result + '</div>';
+                case 'center':
+                    return name ? '<div class="list-unit mui-ellipsis">' + name + ':' + result + '</div>': '<div class="list-unit mui-ellipsis">' + result + '</div>';
+                default:
+                    return ''
+            }
+        } else {
+            return result;
+        }
+    }
 };

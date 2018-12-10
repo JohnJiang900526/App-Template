@@ -861,3 +861,10 @@ input[readonly] {
 .mui-bar.mui-bar-nav,.mui-bar.mui-bar-footer, .mui-bar{
     touch-action: none; 
 }
+
+.mui-table-view-cell {
+    position: relative;
+    overflow: hidden;
+    padding: 11px 5px;
+    -webkit-touch-callout: none;
+}
