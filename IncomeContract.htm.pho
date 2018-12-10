@@ -115,7 +115,7 @@
                         </div>
                         <div class="mui-input-row">
                             <label class="mui-label-text">收款金额</label>
-                            <input id="PS_IncomeContract_PayNodes_PayAmount" required name="PayAmount" type="number" class="mui-input" placeholder="">
+                            <input id="PS_IncomeContract_PayNodes_PayAmount" required name="PayAmount" data-fix="4" type="number" class="mui-input" placeholder="">
                         </div>
                         <div class="mui-input-row">
                             <label class="mui-label-text">节点描述</label>
