@@ -35,7 +35,7 @@ function AppForm() {
 
     return appForm = {
         // ajax封装
-        _ajax: function(url, params, type, cache, callback) {
+        _ajax: function (url, params, type, cache, callback) {
             var that = this;
 
             that._loading();
@@ -44,7 +44,7 @@ function AppForm() {
                 data: params,
                 type: type,
                 cache: cache,
-                success: function(data) {
+                success: function (data) {
                     that._closeLoading();
                     if (callback) {
                         callback(data);
@@ -56,7 +56,7 @@ function AppForm() {
                 }
             });
         },
-        _APIAjax: function(params, callback, reUrl) {
+        _APIAjax: function (params, callback, reUrl) {
             var that = this;
 
             var url = "/API/APIMessages";
@@ -68,20 +68,20 @@ function AppForm() {
         // 自定义时间格式 ：format
         // "yyyy-MM-dd HH:mm:ss";"yyyy-MM-dd-HH-mm-ss"
         // "yyyy-MM-ddTHH:mm:ss" ....
-        _formatDate: function(time, format) {
+        _formatDate: function (time, format) {
             var t = new Date(time);
             if (t.getTime() == 0) {
                 t = new Date();
             }
-            
-            var tf = function(i) {
+
+            var tf = function (i) {
                 return (i < 10 ? '0' : '') + i;
             };
             if (!format) {
                 format = "yyyy-MM-dd";
             }
 
-            return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function(type) {
+            return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (type) {
                 switch (type) {
                     case 'yyyy':
                         return tf(t.getFullYear());
@@ -99,7 +99,7 @@ function AppForm() {
             })
         },
         // 打开日期组件
-        _openDtPicker: function(option, callback) {
+        _openDtPicker: function (option, callback) {
             var _self = this;
             var options = {
                 type: "date"
@@ -119,10 +119,10 @@ function AppForm() {
             });
         },
         // 打开选择器组件
-        _openPicker: function(arr, callback) {
+        _openPicker: function (arr, callback) {
             var picker = new mui.PopPicker();
             picker.setData(arr);
-            picker.show(function(data) {
+            picker.show(function (data) {
                 if (callback) {
                     callback(data[0]);
                 }
@@ -132,7 +132,7 @@ function AppForm() {
         // 获取连接中的参数,只需要传进对应的名称
         // file:///E:/myProjects/myTools/test.html?id=1234567&name=john
         //如上面的例子，只需要传进"id"  或者 "name"
-        _getLocaArg: function() {
+        _getLocaArg: function () {
             var name;
 
             if (arguments.length === 0 || arguments.length >= 2) {
@@ -161,7 +161,7 @@ function AppForm() {
                 '<span class="mui-spinner"></span>' +
                 '</div>' +
                 '<div class="loading-text">' +
-                '<span class="text">'+ text +'</span>' +
+                '<span class="text">' + text + '</span>' +
                 '</div>' +
                 '</div>' +
                 '</div>';
@@ -172,10 +172,10 @@ function AppForm() {
             }
         },
         // 关闭loading
-        _closeLoading: function() {
+        _closeLoading: function () {
             var loadings = $(top.document.body).find(".loading-pop-content");
-            
-            loadings.each(function() {
+
+            loadings.each(function () {
                 var $this = $(this);
                 var name = $this.attr("name");
 
@@ -185,12 +185,12 @@ function AppForm() {
             });
         },
         //获取附件的avatar
-        _getAvatar: function(fileExt, id) {
+        _getAvatar: function (fileExt, id) {
             if (!fileExt) {
                 fileExt = "";
             }
             fileExt = fileExt.toLowerCase();
-            if ( /\.(png|jpe?g|gif|svg)(\?.*)?$/.test(fileExt)) {
+            if (/\.(png|jpe?g|gif|svg)(\?.*)?$/.test(fileExt)) {
                 return {
                     url: "/PowerPlat/FormXml/FileViewer.aspx?online=1&fileid=" + id,
                     type: "picFiles"
@@ -203,7 +203,7 @@ function AppForm() {
             } else if (/\.(mp3|wav|flac|aac)(\?.*)?$/.test(fileExt)) {
                 return {
                     url: "/Apps/images/fileAudio.png",
-                    type:  "mediaFiles"
+                    type: "mediaFiles"
                 };
             } else if (/\.(doc|docx|docm|dot|dotx|dotm)(\?.*)?$/.test(fileExt)) {
                 return {
@@ -213,7 +213,7 @@ function AppForm() {
             } else if (/\.(pdf)(\?.*)?$/.test(fileExt)) {
                 return {
                     url: "/Apps/images/filePdf.png",
-                    type:  "docFiles"
+                    type: "docFiles"
                 };
             } else if (/\.(txt)(\?.*)?$/.test(fileExt)) {
                 return {
@@ -237,7 +237,7 @@ function AppForm() {
                 };
             }
         },
-        _checkPlat:function (callback) {
+        _checkPlat: function (callback) {
             var u = navigator.userAgent;
             var tag;
             if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {
@@ -329,7 +329,7 @@ function AppForm() {
                 p.swhere = Util.Base64Swhere(p.swhere);
             }
 
-            that._ajax(url, p, "post", false, function(data) {
+            that._ajax(url, p, "post", false, function (data) {
                 var getData = JSON.parse(data);
                 if (callback) {
                     callback(getData);
@@ -339,10 +339,10 @@ function AppForm() {
         //判断业务流程状态已经批准
         WorkflowApproved: function () {
             //业务不需要走流程
-            if (typeof (workflowdata) == "undefined" || !workflowdata){
+            if (typeof (workflowdata) == "undefined" || !workflowdata) {
                 return false;
             }
-                
+
             //流程结束
             // FlowRecordStatus.Finish 50 = 办结
             if (workflowdata.RecordStatus == 50) {
@@ -386,7 +386,7 @@ function AppForm() {
             // 如果是表单的主表form，且有台账页面传递过来的新增默认值，
             // 且是新增状态，则需要赋值进去
             var miniid = formConfig.config.joindata.miniid;
-            if ( config.miniid == miniid &&formConfig.FormState == "add" ) {
+            if (config.miniid == miniid && formConfig.FormState == "add") {
                 formConfig.KeyValue = config.currow[config.keyfield];
 
                 if (!KeyValue) {
@@ -410,23 +410,23 @@ function AppForm() {
             var that = this;
 
             //业务不需要走流程
-            if ( !workflowdata) {
+            if (!workflowdata) {
                 return false;
             }
-                
+
             if (that.WorkflowApproved()) {
                 return true;
             }
             //FlowOperate.Active 参阅 FlowStatusSerials.js
-            var flowActive = 4096; 
+            var flowActive = 4096;
             //新流程通过当前审批人和当前登录人来判断
             if (workflowdata.WorkFlowFlag && workflowdata.WorkFlowFlag == "workflows") {
                 //如果没有  CanFlowOperate 说明当下此人无SequeID
                 if (!workflowdata.CanFlowOperate) {
-                    return false; 
+                    return false;
                 }
 
-                if (workflowdata.CanFlowOperate.UserType != 1 && (workflowdata.CanFlowOperate.UserType & 4) == 0){
+                if (workflowdata.CanFlowOperate.UserType != 1 && (workflowdata.CanFlowOperate.UserType & 4) == 0) {
                     return true;
                 } else {
                     return false;
@@ -450,18 +450,18 @@ function AppForm() {
             var that = this;
             var config = that.getConfig(formConfig.config.joindata.KeyWord);
             if (
-                enableform != undefined && 
-                enableform == 0 && config && 
-                config.currow && 
-                config.statusfield && 
+                enableform != undefined &&
+                enableform == 0 && config &&
+                config.currow &&
+                config.statusfield &&
                 config.currow[config.statusfield] != "0" &&
                 (workflowdata.CurNodeType != 10 || !that.IsRegHuman(config, config.currow)) &&
                 sessiondata.IsITAdmin == false
-                ) {
-                    return true;
-                } else {
-                    return false;
-                }
+            ) {
+                return true;
+            } else {
+                return false;
+            }
         },
         //从formconfig中获取所有Config形成List返回
         ConfigToList: function (config) {
@@ -493,16 +493,16 @@ function AppForm() {
             if (!config) {
                 config = formConfig.config.joindata;
             }
-                
+
             if (config.miniid == miniid) {
                 return config;
             }
-               
+
             var result = null;
             if (!config.children || config.children.length == 0) {
                 return result;
             }
-                
+
             for (var i = 0; i < config.children.length; i++) {
                 result = that.getConfig(miniid, config.children[i]);
                 if (result) {
@@ -543,7 +543,7 @@ function AppForm() {
             if (htmlparams[type].value != "") {
                 var format = htmlparams[type].format;
                 //普通文本
-                if (!format){
+                if (!format) {
                     result = row[htmlparams[type].value];
                 } else if (format == "combobox") {
                     var comb = comboboxdata[htmlparams.gridid + "." + htmlparams[type].value];
@@ -560,10 +560,10 @@ function AppForm() {
                     }
                 } else if (format.indexOf("n") > -1 || format.indexOf("c") > -1 || format.indexOf("p") > -1) {
                     //数字
-                    result = new Number( row[htmlparams[type].value]);
+                    result = new Number(row[htmlparams[type].value]);
                 } else if (format.indexOf("y") > -1) {
                     //日期
-                    result =  that._formatDate(row[htmlparams[type].value], format);
+                    result = that._formatDate(row[htmlparams[type].value], format);
                 }
             }
 
@@ -572,7 +572,7 @@ function AppForm() {
             }
             return result.replace("null", "");
         },
-         //form config 中 filter 转换成 where 条件
+        //form config 中 filter 转换成 where 条件
         filterToSWhere: function (filter) {
             var result = "";
             if (!filter) {
@@ -587,7 +587,7 @@ function AppForm() {
             return result;
         },
         // 状态封装
-        formatStatus: function(keyword, key, id) {
+        formatStatus: function (keyword, key, id) {
             var result = id;
             var data = [];
             if (!comboboxdata[keyword + "." + key]) {
@@ -600,7 +600,7 @@ function AppForm() {
                 }
             }
 
-            for(var i = 0; i < data.length; i++) {
+            for (var i = 0; i < data.length; i++) {
                 if (id == data[i].id) {
                     result = data[i].text;
                     break;
@@ -610,7 +610,7 @@ function AppForm() {
             return result;
         },
         // 获取主表数据
-        getMainTable: function(formConfig, callback) {
+        getMainTable: function (formConfig, callback) {
             var url = "/Form/FormLoad";
             var params = {
                 KeyWord: formConfig.config.joindata.KeyWord,
@@ -619,7 +619,7 @@ function AppForm() {
                 select: "",
                 formstate: formConfig.FormState
             };
-            this._ajax(url, params, "get", false, function(data) {
+            this._ajax(url, params, "get", false, function (data) {
                 if (callback) {
                     if (typeof data == "string") {
                         data = JSON.parse(data);
@@ -633,20 +633,20 @@ function AppForm() {
             });
         },
         // 渲染主表数据  显示在页面上
-        setMainTable: function(obj, config) {
+        setMainTable: function (obj, config) {
             var that = this;
             var obj = $.extend({}, obj);
             var KeyWord = config.KeyWord;
             var form = $("#" + KeyWord);
 
-            if (form.size() ==  0) {
+            if (form.size() == 0) {
                 //在主表的form元素上，给定form元素的id 为config中的KeyWord
                 //否则，抛出错误，不能正确赋值
                 throw new Error("Can not find form's KeyWord, please set it");
             }
 
-            for(var key in obj) {
-                if (key == "RegDate" || key == "UpdDate" ) {
+            for (var key in obj) {
+                if (key == "RegDate" || key == "UpdDate") {
                     obj[key] = that._formatDate(obj[key]);
                 }
 
@@ -660,22 +660,22 @@ function AppForm() {
                 form.find("#" + KeyWord + "_" + key).val(obj[key]);
             }
         },
-        disabledRight: function() {
+        disabledRight: function () {
             var that = this;
             var effected = formConfig.Effected;
 
-            return (formConfig.FormState == "view") || 
-            (!workflowdata && !keywordright[config.KeyWord]) ||
-            that.WorkflowReadOnly() || 
-            effected == true || 
-            that.WorkFlowUpdateForm() == true 
+            return (formConfig.FormState == "view") ||
+                (!workflowdata && !keywordright[config.KeyWord]) ||
+                that.WorkflowReadOnly() ||
+                effected == true ||
+                that.WorkFlowUpdateForm() == true
         },
         // 权限处理
-        setPermission: function(data, callback) {
+        setPermission: function (data, callback) {
             var that = this;
             var disabledRight = that.disabledRight();
             var table_children = optionDiy.childrenTables;
-            
+
             if (disabledRight) {
                 var obj = $.extend({}, data);
                 var KeyWord = config.KeyWord;
@@ -697,12 +697,12 @@ function AppForm() {
             }
         },
         // comboboxdata数据解析
-        encodeComboBoxData: function(keyword, key, id) {
+        encodeComboBoxData: function (keyword, key, id) {
             var result = "", item;
             var data = [];
             if (comboboxdata[keyword + "." + key]) {
                 data = comboboxdata[keyword + "." + key].Data;
-                for(var i = 0; i < data.length; i++) {
+                for (var i = 0; i < data.length; i++) {
                     item = data[i];
                     if (item.id == id) {
                         result = item.text;
@@ -717,12 +717,12 @@ function AppForm() {
             }
         },
         // comboboxdata数据反解析
-        decodeComboBoxData: function(keyword, key, text) {
+        decodeComboBoxData: function (keyword, key, text) {
             var result = "", item;
             var data = [];
             if (comboboxdata[keyword + "." + key]) {
                 data = comboboxdata[keyword + "." + key].Data;
-                for(var i = 0; i < data.length; i++) {
+                for (var i = 0; i < data.length; i++) {
                     item = data[i];
                     if (item.text == text) {
                         result = item.id;
@@ -737,7 +737,7 @@ function AppForm() {
             }
         },
         // 获取附件数据
-        getDocFiles: function(callback) {
+        getDocFiles: function (callback) {
             var that = this;
 
             var url = "/Form/GetDocFiles";
@@ -750,11 +750,11 @@ function AppForm() {
                 index: 0,
                 size: 0
             };
-            that._ajax(url, params, "get", true, function(data) {
+            that._ajax(url, params, "get", true, function (data) {
                 var getFileData = JSON.parse(data);
                 FileAttachRight = getFileData.data.right;
-                
-                for(var key in FileAttachRight) {
+
+                for (var key in FileAttachRight) {
                     FileAttachRight[key] += "";
                 }
 
@@ -767,7 +767,7 @@ function AppForm() {
                         otherFiles: []
                     };
 
-                    files.map(function(item, index) {
+                    files.map(function (item, index) {
                         var fileAvatar = that._getAvatar(item.FileExt, item.Id);
 
                         dataMap[fileAvatar.type].push(item);
@@ -783,7 +783,7 @@ function AppForm() {
             });
         },
         // 删除附件
-        deleteAttach: function(id, callback) {
+        deleteAttach: function (id, callback) {
             var url = '/PowerPlat/Control/File.ashx?_type=default&action=delete&_fileid=' + id;
             $.getJSON(url, function (data) {
                 if (callback) {
@@ -792,12 +792,12 @@ function AppForm() {
             });
         },
         // 附件渲染模板
-        docFilesTemp: function(dataMap) {
+        docFilesTemp: function (dataMap) {
             var that = this;
             var attachNum = 0;
 
             if (dataMap) {
-                for(var key in dataMap) {
+                for (var key in dataMap) {
                     var attachList = dataMap[key];
                     var fileItem, html = '';
 
@@ -810,17 +810,17 @@ function AppForm() {
                         $("#" + key).prev().removeClass("hide");
                     }
 
-                    for(var i = 0; i < attachList.length; i++) {
+                    for (var i = 0; i < attachList.length; i++) {
                         fileItem = attachList[i];
                         if (!fileItem.FileExt) {
                             fileItem.FileExt = "";
                         }
-                        html += '<li data-id="'+ fileItem.Id +'" data-fileext="'+ fileItem.FileExt +'" data-name="'+ fileItem.Name +'" data-type="'+ fileItem.fileType +'" class="mui-table-view-cell mui-media">' +
+                        html += '<li data-id="' + fileItem.Id + '" data-fileext="' + fileItem.FileExt + '" data-name="' + fileItem.Name + '" data-type="' + fileItem.fileType + '" class="mui-table-view-cell mui-media">' +
                             '<a href="javascript:;">' +
-                            '<img class="mui-media-object mui-pull-left"  src="'+ fileItem.avatar +'">' +
+                            '<img class="mui-media-object mui-pull-left"  src="' + fileItem.avatar + '">' +
                             '<div class="mui-media-body">' +
-                            '<span>'+ that._formatDate(fileItem.UpdDate, "yyyy-MM-dd") +'</span>' +
-                            '<p class="mui-ellipsis">'+ fileItem.Name  + fileItem.FileExt +'</p>' +
+                            '<span>' + that._formatDate(fileItem.UpdDate, "yyyy-MM-dd") + '</span>' +
+                            '<p class="mui-ellipsis">' + fileItem.Name + fileItem.FileExt + '</p>' +
                             '</div>' +
                             '<span class="mui-navigate-right-delete"></span>' +
                             '</a>' +
@@ -830,7 +830,7 @@ function AppForm() {
                     $("#" + key).html(html);
 
                     // 执行删除附件
-                    $("#" + key).find(".mui-navigate-right-delete").on("tap", function(e) {
+                    $("#" + key).find(".mui-navigate-right-delete").on("tap", function (e) {
                         e.preventDefault();
                         e.stopPropagation();
 
@@ -839,14 +839,14 @@ function AppForm() {
                         var content = $this.closest(".mui-table-view");
                         var id = row.attr("data-id");
 
-                        mui.confirm('确认删除此文件？', '注意', ["否", "是"], function(e) {
+                        mui.confirm('确认删除此文件？', '注意', ["否", "是"], function (e) {
                             if (e.index == 1) {
                                 if (FileAttachRight.bDocDel == "1") {
-                                    that.deleteAttach(id, function(data) {
+                                    that.deleteAttach(id, function (data) {
                                         if (data.success) {
                                             row.remove();
                                             mui.toast('删除成功');
-    
+
                                             var lastAttachNum = content.find(".mui-table-view-cell.mui-media").size();
                                             if (lastAttachNum == 0) {
                                                 content.prev().hide();
@@ -863,15 +863,15 @@ function AppForm() {
                     });
 
                     // 点击查看附件
-                    $("#" + key).find(".mui-table-view-cell").on("tap", function(e) {
+                    $("#" + key).find(".mui-table-view-cell").on("tap", function (e) {
                         e.preventDefault();
                         e.stopPropagation();
 
                         var $this = $(this),
-                        id = $this.attr("data-id"),
-                        fileType = $this.attr("data-type"),
-                        title = $this.attr("data-name"),
-                        fileext = $this.attr("data-fileext");
+                            id = $this.attr("data-id"),
+                            fileType = $this.attr("data-type"),
+                            title = $this.attr("data-name"),
+                            fileext = $this.attr("data-fileext");
 
                         if (FileAttachRight.bDocView != "1") {
                             if (fileType == "picFiles") {
@@ -881,7 +881,7 @@ function AppForm() {
                             }
                             return false;
                         }
-                        
+
                         appPhysical.OpenView(id, title + fileext, fileext);
                     });
                 }
@@ -889,9 +889,9 @@ function AppForm() {
 
         },
         // 附件上传事件
-        upLoadAttachEvents: function(conf) {
+        upLoadAttachEvents: function (conf) {
             // 打开图库/相册
-            $("#Gallery").on("tap", function(e) {
+            $("#Gallery").on("tap", function (e) {
                 e.preventDefault();
                 if (FileAttachRight.bDocUp == "1") {
                     appPhysical.OpenGallery(conf);
@@ -900,7 +900,7 @@ function AppForm() {
                 }
             });
             // 打开相机
-            $("#Camera").on("tap", function(e) {
+            $("#Camera").on("tap", function (e) {
                 e.preventDefault();
                 if (FileAttachRight.bDocUp == "1") {
                     appPhysical.OpenCamera(conf);
@@ -910,7 +910,7 @@ function AppForm() {
             });
 
             // 打开录像
-            $("#RecordVideos").on("tap", function(e) {
+            $("#RecordVideos").on("tap", function (e) {
                 e.preventDefault();
                 if (FileAttachRight.bDocUp == "1") {
                     appPhysical.RecordVideos(conf);
@@ -919,7 +919,7 @@ function AppForm() {
                 }
             });
             // 上传视频
-            $("#Videos").on("tap", function(e) {
+            $("#Videos").on("tap", function (e) {
                 e.preventDefault();
                 if (FileAttachRight.bDocUp == "1") {
                     appPhysical.OpenVideos(conf);
@@ -929,7 +929,7 @@ function AppForm() {
             });
 
             // 打开音频
-            $("#Audio").on("tap", function(e) {
+            $("#Audio").on("tap", function (e) {
                 e.preventDefault();
                 if (FileAttachRight.bDocUp == "1") {
                     appPhysical.OpenAudio(conf);
@@ -938,7 +938,7 @@ function AppForm() {
                 }
             });
             // 打开上传文件
-            $("#UploadFileAll").on("tap", function(e){
+            $("#UploadFileAll").on("tap", function (e) {
                 e.preventDefault();
                 if (FileAttachRight.bDocUp == "1") {
                     appPhysical.UploadFile(conf);
@@ -992,7 +992,7 @@ function AppForm() {
                 tableOptionMap = $.extend({}, option.childrenTables);
             }
 
-            for(var i = 0; i < configs.length; i++) {
+            for (var i = 0; i < configs.length; i++) {
                 listConfig = configs[i];
                 if (tableOptionMap) {
                     // 使用$.extend，实现深度克隆
@@ -1004,7 +1004,7 @@ function AppForm() {
                         defaultTableOpt.dataparams = $.extend({}, defaultTableOpt.dataparams, {
                             KeyWord: listConfig.KeyWord
                         });
-                        defaultTableOpt.htmlparams = $.extend({},defaultTableOpt.htmlparams, {
+                        defaultTableOpt.htmlparams = $.extend({}, defaultTableOpt.htmlparams, {
                             gridid: listConfig.KeyWord
                         });
 
@@ -1016,18 +1016,18 @@ function AppForm() {
             }
         },
         // 打开子表表单
-        openChildForm: function(keyword, id, callback) {
+        openChildForm: function (keyword, id, callback) {
             var that = this;
-            var thisTableConfig =  configsMap[keyword];
+            var thisTableConfig = configsMap[keyword];
             var data = thisTableConfig.data;
 
             var row = "", item;
-            for(var i = 0; i < data.length; i++) {
+            for (var i = 0; i < data.length; i++) {
                 item = data[i];
                 if (item.UpdDate) {
                     item.UpdDate = that._formatDate(item.UpdDate);
                 }
-                if (id  == item.Id) {
+                if (id == item.Id) {
                     row = item;
                     break;
                 }
@@ -1038,7 +1038,7 @@ function AppForm() {
             }
         },
         // 子表lists html渲染模板
-        tableCellTemp: function(data, htmlparams) {
+        tableCellTemp: function (data, htmlparams) {
             var that = this;
             var html = '', item;
 
@@ -1047,30 +1047,30 @@ function AppForm() {
                 center,
                 right;
 
-            for(var i = 0; i < data.length; i++) {
+            for (var i = 0; i < data.length; i++) {
                 item = data[i];
                 title = that.getTableTypeResult(htmlparams, item, "title");
-                left =  that.getTableTypeResult(htmlparams, item, "left");
-                right =  that.getTableTypeResult(htmlparams, item, "right");
-                center =  that.getTableTypeResult(htmlparams, item, "center");
+                left = that.getTableTypeResult(htmlparams, item, "left");
+                right = that.getTableTypeResult(htmlparams, item, "right");
+                center = that.getTableTypeResult(htmlparams, item, "center");
 
-                html += '<li data-id="'+ item.Id +'" data-idfield="'+ htmlparams.idfield +'" class="mui-table-view-cell">' +
+                html += '<li data-id="' + item.Id + '" data-idfield="' + htmlparams.idfield + '" class="mui-table-view-cell">' +
                     '<div class="mui-slider-right mui-disabled">' +
                     '<a class="mui-btn mui-btn-delete mui-btn-red">删除</a>' +
                     '</div>' +
                     '<div class="mui-slider-handle">' +
                     '<div>' +
                     '<div class="mui-media-object mui-pull-left mui-checkbox">' +
-                    '<input class="hide" name="checkbox" type="checkbox" >'+
+                    '<input class="hide" name="checkbox" type="checkbox" >' +
                     '</div>' +
                     '<div class="mui-media-body">' +
                     '<p class="mui-ellipsis list-title">' +
-                    '<span>'+ title +'</span>' +
+                    '<span>' + title + '</span>' +
                     '</p>' +
                     '<div class="list-units">' +
-                    '<div class="list-unit mui-ellipsis">'+ left +'</div>' +
-                    '<div class="list-unit mui-ellipsis">'+ center +'</div>' +
-                    '<div class="list-unit mui-ellipsis">'+ right +'</div>' +
+                    '<div class="list-unit mui-ellipsis">' + left + '</div>' +
+                    '<div class="list-unit mui-ellipsis">' + center + '</div>' +
+                    '<div class="list-unit mui-ellipsis">' + right + '</div>' +
                     '</div>' +
                     '</div>' +
                     '</div>' +
@@ -1080,7 +1080,7 @@ function AppForm() {
             $("#" + htmlparams.gridid).html(html);
 
             // 打开子表表单
-            $("#" + htmlparams.gridid ).find(".mui-media-body, .mui-media-object").on("tap", function(e) {
+            $("#" + htmlparams.gridid).find(".mui-media-body, .mui-media-object").on("tap", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -1103,9 +1103,9 @@ function AppForm() {
                     formConfig.table_data_list_id = id;
                     formConfig.table_data_list_idfield = idfield;
 
-                    that.openChildForm(htmlparams.gridid, id, function(row) {
+                    that.openChildForm(htmlparams.gridid, id, function (row) {
                         if (row) {
-                            for(var key in row) {
+                            for (var key in row) {
                                 var value = that.encodeComboBoxData(htmlparams.gridid, key, row[key]);
                                 if (value !== row[key]) {
                                     if (formConfig.table_state != "added") {
@@ -1144,7 +1144,7 @@ function AppForm() {
             });
         },
         // 加载单个子表数据
-        getChildrenTable: function(keyword) {
+        getChildrenTable: function (keyword) {
             var that = this;
             var thisTableConfig;
             var thisTableDiyConfig = optionDiy.childrenTables[keyword];
@@ -1161,10 +1161,10 @@ function AppForm() {
                 if (thisTableConfig.fields && pconfig) {
                     if (pconfig.currow) {
                         for (var fd in thisTableConfig.fields) {
-                            if (typeof (fd) == "function"){
+                            if (typeof (fd) == "function") {
                                 continue;
                             }
-                                
+
                             var pfd = thisTableConfig.fields[fd];
                             //是常量值
                             if (typeof (pconfig.currow[pfd]) == undefined) {
@@ -1174,7 +1174,7 @@ function AppForm() {
                                     swhere = swhere + " and " + fd + "='" + pconfig.currow[pfd] + "'";
                                 } else {
                                     swhere = swhere + " and 1=0";
-                                }   
+                                }
                             }
                         }
                     } else {
@@ -1185,8 +1185,8 @@ function AppForm() {
             }
 
             if (
-                thisTableDiyConfig && 
-                thisTableDiyConfig.dataparams && 
+                thisTableDiyConfig &&
+                thisTableDiyConfig.dataparams &&
                 thisTableDiyConfig.dataparams.swhere
             ) {
                 swhere += " and " + thisTableDiyConfig.dataparams.swhere
@@ -1194,29 +1194,29 @@ function AppForm() {
 
             thisTableConfig.dataparams.swhere = swhere;
 
-            that.gridPageLoad(thisTableConfig.dataparams, function(data) {
+            that.gridPageLoad(thisTableConfig.dataparams, function (data) {
                 var getData = [];
                 if (data.success) {
                     if (data.data.value) {
                         getData = JSON.parse(data.data.value);
                     }
                     that.tableCellTemp(getData, thisTableConfig.htmlparams);
-                    configsMap[keyword] = $.extend(configsMap[keyword], {data: getData});
+                    configsMap[keyword] = $.extend(configsMap[keyword], { data: getData });
                 }
             });
         },
         // 循环加载指定的所有子表
-        loadChildrenTable: function(optionDiy, type, callback) {
+        loadChildrenTable: function (optionDiy, type, callback) {
             var that = this;
             if (typeof optionDiy == "object") {
                 if (optionDiy.childrenTables && type == "all") {
-                    for(var key in optionDiy.childrenTables) {
+                    for (var key in optionDiy.childrenTables) {
                         if (callback) {
                             callback(key);
                         }
                     }
                 }
-            } else if(typeof optionDiy == "string"){
+            } else if (typeof optionDiy == "string") {
                 if (type == "single") {
                     callback(optionDiy);
                 }
@@ -1242,7 +1242,7 @@ function AppForm() {
                 }
             }
 
-            form.find("input,textarea").each(function() {
+            form.find("input,textarea").each(function () {
                 var $this = $(this);
                 var name = $this.attr("name");
                 var value = $this.val();
@@ -1259,7 +1259,7 @@ function AppForm() {
                 return false;
             }
 
-            form.find("input,textarea").each(function() {
+            form.find("input,textarea").each(function () {
                 var $this = $(this);
                 var name = $this.attr("name");
                 var value = $this.val();
@@ -1282,7 +1282,7 @@ function AppForm() {
             if (formConfig.table_state == "added") {
                 data[thisTableConfig.keyfield] = Util.newGuid();
             }
-                
+
             var pconfig = that.getParentConfig(keyword);
             if (pconfig && pconfig.currow) {
                 for (var fd in thisTableConfig.fields) {
@@ -1295,9 +1295,9 @@ function AppForm() {
             }
 
             var pack = {};
-            pack[keyword] = { 
+            pack[keyword] = {
                 KeyWordType: thisTableConfig.KeyWordType,
-                data: [data] 
+                data: [data]
             };
 
 
@@ -1305,19 +1305,19 @@ function AppForm() {
                 url: "/Form/SaveWebForm",
                 type: "POST",
                 data: {
-                    formId: FormId, 
+                    formId: FormId,
                     encode: "r4",
                     jsonData: Util.Base64Swhere(JSON.stringify(pack))
                 },
                 cache: false,
                 success: function (text) {
-                    var getData = JSON.parse(text);   
+                    var getData = JSON.parse(text);
                     if (getData.success) {
                         if (callback) {
                             callback();
                         }
 
-                        that.loadChildrenTable(keyword, "single", function(table) {
+                        that.loadChildrenTable(keyword, "single", function (table) {
                             that.getChildrenTable(table);
 
                             var form = $("#" + keyword + "_Form");
@@ -1340,7 +1340,7 @@ function AppForm() {
                 lis = row;
             }
 
-            lis.each(function() {
+            lis.each(function () {
                 var $this = $(this);
                 var id = $this.attr("data-id");
                 var idfield = $this.attr("data-idfield");
@@ -1380,16 +1380,16 @@ function AppForm() {
                         callback(getData, lis);
                     }
                 },
-                error: function(e) {
+                error: function (e) {
                     that._closeLoading();
                     mui.alert(e);
                 }
             });
         },
-        getWizardList: function(searchKey) {
+        getWizardList: function (searchKey) {
             var that = this;
             var where = "";
-           
+
             var obj = {
                 url: "/Form/GridPageLoad",
                 select: "",
@@ -1405,14 +1405,14 @@ function AppForm() {
                 where = wizardCurrentKeyMap.config.filter;
                 obj.swhere += " and " + where;
             }
-            
+
             if (searchKey) {
                 obj.swhere += " and Name like '%" + searchKey + "%'";
             } else {
                 obj.swhere += " and Name like '%" + "" + "%'";
             }
 
-            that.gridPageLoad(obj, function(data) {
+            that.gridPageLoad(obj, function (data) {
                 var getData = [];
                 if (data.data.value) {
                     getData = JSON.parse(data.data.value);
@@ -1422,14 +1422,14 @@ function AppForm() {
             });
         },
         // 向导列表的模板
-        wizardListTemp: function(data) {
+        wizardListTemp: function (data) {
             var item, html = '';
-            for(var i = 0; i < data.length; i++) {
+            for (var i = 0; i < data.length; i++) {
                 item = data[i];
-                html += '<li data-id="'+ item.Id +'" class="mui-table-view-cell mui-indexed-list-item mui-radio mui-left">' +
+                html += '<li data-id="' + item.Id + '" class="mui-table-view-cell mui-indexed-list-item mui-radio mui-left">' +
                     '<input type="radio" name="wizard"/>' +
-                    '<span class="wizard-list-font">'+ item.Name +'</span>' +
-                    '<span class="wizard-list-font">  '+ item.Code +'</span>' +
+                    '<span class="wizard-list-font">' + item.Name + '</span>' +
+                    '<span class="wizard-list-font">  ' + item.Code + '</span>' +
                     '</li>';
             }
 
@@ -1445,7 +1445,7 @@ function AppForm() {
                 mui.alert(app_global_ResouceId["g_through"] + actionId + app_global_ResouceId["not_fined_config"]);
                 return false;
             }
-            
+
             var where = "";
             var title = "选择";
             if (thisActionConfig.ComponentName) {
@@ -1460,7 +1460,7 @@ function AppForm() {
             that.getWizardList();
         },
         //打开向导进行配置获取进行相关赋值
-        openWizardBefore: function(option) {
+        openWizardBefore: function (option) {
             if (!option) {
                 return false;
             }
@@ -1468,23 +1468,23 @@ function AppForm() {
             $("#wizard_title").text(option.title);
             $("#search_wizard").siblings(".mui-placeholder")
                 .find("span:not(.mui-icon)").text(option.searchName);
-            
+
             $("#complete_wizard").attr("data-target", option.target);
         },
         // 关闭向导进行配置获取进行相关去值
-        closeWizardBefore: function() {
+        closeWizardBefore: function () {
             $("#wizard_title").text("");
             $("#search_wizard").siblings(".mui-placeholder")
                 .find("span:not(.mui-icon)").text("");
-            
+
             $("#complete_wizard").attr("data-target", "");
 
             $(".mui-wizard-content")
-            .addClass("move-animation-start")
-            .removeClass("move-animation-back");
+                .addClass("move-animation-start")
+                .removeClass("move-animation-back");
         },
         // 获取主表数据基本参数
-        flowSaveValid: function(params) {
+        flowSaveValid: function (params) {
             var that = this;
             var keyword = formConfig.config.joindata.KeyWord;
             var isChange = false;
@@ -1498,7 +1498,7 @@ function AppForm() {
 
                 value = that.decodeComboBoxData(keyword, key, value);
                 if (!$this.attr("readonly") || !$this.attr("disabled")) {
-                    if (formConfig.config.joindata.currow[key] != value ) {
+                    if (formConfig.config.joindata.currow[key] != value) {
                         formConfig.config.joindata.currow[key] = value;
                         isChange = true;
                     }
@@ -1509,7 +1509,7 @@ function AppForm() {
             if (params == undefined) {
                 params = {};
             }
-            
+
             var row = formConfig.config.joindata.currow;
             if (formConfig.FormState == "add") {
                 row["_state"] = "added";
@@ -1536,7 +1536,7 @@ function AppForm() {
             //如果是审批处理，允许没有提交数据
             if (
                 typeof (workflowdata) != "undefined" &&
-                typeof (formConfig) != "undefined" && 
+                typeof (formConfig) != "undefined" &&
                 !that.WorkflowReadOnly()) {
 
                 if (!params) {
@@ -1548,15 +1548,15 @@ function AppForm() {
 
             //如果是新增状态数据，且是当前录入人
             var joindata = formConfig.config.joindata;
-            if (joindata.statusfield && 
-                joindata.currow[joindata.statusfield] == "0"&& 
+            if (joindata.statusfield &&
+                joindata.currow[joindata.statusfield] == "0" &&
                 that.IsRegHuman(joindata, joindata.currow)
             ) {
                 params.IsRegHuman = "1";
             }
-           
+
             if (!params) {
-                jdata.Params = "";    
+                jdata.Params = "";
             } else {
                 jdata.Params = JSON.stringify(params);
             }
@@ -1568,7 +1568,7 @@ function AppForm() {
             var that = this;
             var jdata = that.flowSaveValid(params);
             var url = "/Form/SaveWebForm";
-            
+
             jdata.Params = Util.Base64Encode(jdata.Params);
             // wsl 追加，如果表单参数中有  FromSource ,并且值等于 TransFlow ，
             // 说明是从事务流触发的表单新增，则URL重新定向
@@ -1576,7 +1576,7 @@ function AppForm() {
                 url = "/" + params.ControlPath + "/SaveWebForm";
             }
 
-            that._ajax(url, jdata, "POST", false, function(data) {
+            that._ajax(url, jdata, "POST", false, function (data) {
                 var getData = JSON.parse(data);
                 if (getData.success) {
                     mui.toast("保存成功");
@@ -1589,39 +1589,39 @@ function AppForm() {
             });
         },
         // 操作启动操作按钮的时候，先保存主表数据
-        saveFormWorkFlow: function(dataStatus, postInfo, callback) {
+        saveFormWorkFlow: function (dataStatus, postInfo, callback) {
             var that = this;
 
             var params = {
-                json: JSON.stringify(postInfo) 
+                json: JSON.stringify(postInfo)
             };
 
-            if ( !(dataStatus || postInfo) ) {
+            if (!(dataStatus || postInfo)) {
                 mui.alert("参数错误");
                 return false;
             }
 
-            that._APIAjax(params, function(data) {
+            that._APIAjax(params, function (data) {
                 if (callback) {
                     callback(data)
                 }
             });
         },
-        toggleActionSheet: function() {
+        toggleActionSheet: function () {
             mui('#ActionSheet').popover('toggle');
         },
         // 过滤操作表
-        fliterActions: function(actions) {
+        fliterActions: function (actions) {
             var that = this;
             var result = [];
             var effected = formConfig.Effected;
-            
-            actions.forEach(function(item, index) {
+
+            actions.forEach(function (item, index) {
                 if (item.id == "saveMainTable") {
                     var isView = formConfig.FormState == "view";
                     var Approved = that.WorkflowApproved();
                     var sameMan = workflowdata.RecordRegHumId == workflowdata.UserID;
-                    if (!isView && !Approved && sameMan ) {
+                    if (!isView && !Approved && sameMan) {
                         result.push(item);
                     }
                 } else {
@@ -1629,8 +1629,8 @@ function AppForm() {
                         var currentResult = workflowdata.CanFlowOperate;
                         var canFlowOperate = currentResult.CanFlowOperate;
                         var isDisabled = formConfig.FormState == "edit" && workflowdata.RecordRegHumId == workflowdata.UserID;
-                        
-                        if ( (canFlowOperate & appFlowsEnums.ECanFlowOperate[item.id]) > 0) {
+
+                        if ((canFlowOperate & appFlowsEnums.ECanFlowOperate[item.id]) > 0) {
                             result.push(item);
                         }
                     }
@@ -1640,17 +1640,17 @@ function AppForm() {
             return result;
         },
         //如果绑定了工作流体系，则设定工作流按钮 在操作表中 
-        setFlowResult: function() {
+        setFlowResult: function () {
             var that = this;
             // "HangUp", "UnHangUp", "DelayDate", "UnEndFlow"
             var Actions = [
-                { id: "Active", text: "送审", type: "default"},
-                { id: "Send", text: "同意"  , type: "default"},
-                { id: "Return", text: "驳回", type: "default"},
-                { id: "GetBack", text: "回收", type: "default"},
+                { id: "Active", text: "送审", type: "default" },
+                { id: "Send", text: "同意", type: "default" },
+                { id: "Return", text: "驳回", type: "default" },
+                { id: "GetBack", text: "回收", type: "default" },
                 // { id: "Stop", text: "终止", type: "default"},
-                { id: "ShowMonitor", text: "监控", type: "default"},
-                { id: "saveMainTable", text: "保存主表", type: "default"} // 这个不是审批流中的操作 但是要加进去
+                { id: "ShowMonitor", text: "监控", type: "default" },
+                { id: "saveMainTable", text: "保存主表", type: "default" } // 这个不是审批流中的操作 但是要加进去
             ];
 
             var afterFliterAction = that.fliterActions(Actions);
@@ -1658,23 +1658,23 @@ function AppForm() {
                 afterFliterAction = optionDiy.btnExtend.concat(afterFliterAction)
             }
             var html = '';
-            afterFliterAction.forEach(function(item, index) {
+            afterFliterAction.forEach(function (item, index) {
                 var id = item.id;
                 if (id != "saveMainTable") {
                     id = "workFlow_action_" + item.id;
                 }
                 html += '<li class="mui-table-view-cell">' +
-                    '<a id="'+ id +'" href="javascript:void(0)">'+ item.text + '</a>' +
+                    '<a id="' + id + '" href="javascript:void(0)">' + item.text + '</a>' +
                     '</li>';
             });
 
             $("#ActionSheetList").html(html);
 
             // 保存主表信息
-            $("#saveMainTable").on("tap", function(e) {
+            $("#saveMainTable").on("tap", function (e) {
                 e.preventDefault();
 
-                that.saveMainTable(null, function() {
+                that.saveMainTable(null, function () {
                     var actionLink = "";
                     if (formConfig.FormState == "add") {
                         actionLink = "edit";
@@ -1683,17 +1683,17 @@ function AppForm() {
                     }
 
                     var joindata = formConfig.config.joindata;
-                        formConfig.KeyValue = joindata.currow[joindata.keyfield];
-                        window.location.href = "/Form/ValidForm/" 
-                        + FormId + "/"+ actionLink +"/" + formConfig.KeyValue + "/";
+                    formConfig.KeyValue = joindata.currow[joindata.keyfield];
+                    window.location.href = "/Form/ValidForm/"
+                        + FormId + "/" + actionLink + "/" + formConfig.KeyValue + "/";
                     that.load(optionDiy);
                 });
                 that.toggleActionSheet();
             });
 
             //自定义按钮事件
-            optionDiy.btnExtend.forEach(function(item, index) {
-                $("#workFlow_action_" + item.id).on("tap", function(e) {
+            optionDiy.btnExtend.forEach(function (item, index) {
+                $("#workFlow_action_" + item.id).on("tap", function (e) {
                     that.toggleActionSheet();
                     item.callback(e);
                 });
@@ -1734,7 +1734,7 @@ function AppForm() {
             return flowString;
         },
         // 获取流程监控的数据
-        getMonitorLists: function(WorkInfoID, callback) {
+        getMonitorLists: function (WorkInfoID, callback) {
             var that = this;
             if (!WorkInfoID) {
                 mui.alert("WorkInfoID不可以为空");
@@ -1759,7 +1759,7 @@ function AppForm() {
                 json: JSON.stringify(msg)
             };
 
-            that._APIAjax(params, function(data) {
+            that._APIAjax(params, function (data) {
                 var getData = JSON.parse(data);
                 if (!getData.success) {
                     mui.alert(getData.message);
@@ -1829,7 +1829,7 @@ function AppForm() {
                 } else {
                     tmp.static = "agree";
                 }
-                    
+
                 if (item.ActName == "结束" && tmp.opt == "") {
                     tmp.opt = "结束";
                 } else if (item.InboxStatus == appFlowsEnums.EFlowInboxStatus.WorkEnd) {
@@ -1839,7 +1839,7 @@ function AppForm() {
                     tmp.text = "等候签收"
                 } else if (item.InboxStatus == appFlowsEnums.EFlowInboxStatus.Normal) {
                     tmp.text = "正在办理";
-                } else{
+                } else {
                     tmp.text = '意见:' + (item.Content ==
                         "" ? "同意" : item.Content);
                 }
@@ -1852,30 +1852,30 @@ function AppForm() {
             }
         },
         // 监控数据的渲染模板
-        monitorDataTemp: function(data) {
+        monitorDataTemp: function (data) {
             if (!data || !data.length) {
                 return false;
             }
             var html = '';
-            data.forEach(function(item, index) {
+            data.forEach(function (item, index) {
                 html += '<li class="mui-table-view-cell monitor-unit">' +
                     '<div class="list_monitor-wrap">' +
                     '<div class="list-monitor-title">' +
                     '<div class="list-monitor-icon"></div>' +
                     '<div class="time-tag">' +
-                    '<span>'+ item.time +'</span>' +
+                    '<span>' + item.time + '</span>' +
                     '</div>' +
                     '</div>' +
                     '<div class="list-monitor-content">' +
                     '<div class="monitor-line monitor-role">' +
                     '<span>' +
-                    '<span>'+ item.role +': </span>' +
-                    '<span>'+ item.name +'</span>' +
+                    '<span>' + item.role + ': </span>' +
+                    '<span>' + item.name + '</span>' +
                     '</span>' +
-                    '<span class="mui-pull-right">'+ item.opt +'</span>' +
+                    '<span class="mui-pull-right">' + item.opt + '</span>' +
                     '</div>' +
                     '<div class="monitor-line monitor-text">' +
-                    '<span>'+ item.text +'</span>' +
+                    '<span>' + item.text + '</span>' +
                     '</div>' +
                     '</div>' +
                     '</div>' +
@@ -1885,45 +1885,45 @@ function AppForm() {
             $("#lists_monitor").html(html);
         },
         // 触发送审流程
-        showActionFlow: function(data, flowOperate) {
-            var url = "/Form/OpenURL?url=/Apps/workflow/WorkNodeSelect.html?KeyWord=" 
-            + data.KeyWord 
-            + "&KeyValue=" + data.KeyValue 
-            + "&FormID=" + data.FormId 
-            + "&flowOperate=" + flowOperate;
+        showActionFlow: function (data, flowOperate) {
+            var url = "/Form/OpenURL?url=/Apps/workflow/WorkNodeSelect.html?KeyWord="
+                + data.KeyWord
+                + "&KeyValue=" + data.KeyValue
+                + "&FormID=" + data.FormId
+                + "&flowOperate=" + flowOperate;
 
             appPhysical.OpenWebView(url, "流程审批");
         },
         // 触发同意流程
-        showSendFlow: function(data, flowOperate) {
-            var url = "/Form/OpenURL?url=/Apps/workflow/WorkNodeSelect.html?WorkInfoID=" 
-            + data.WorkInfoID
-            + "&SequeID=" + data.SequeID
-            + "&flowOperate=" + flowOperate;
-            
+        showSendFlow: function (data, flowOperate) {
+            var url = "/Form/OpenURL?url=/Apps/workflow/WorkNodeSelect.html?WorkInfoID="
+                + data.WorkInfoID
+                + "&SequeID=" + data.SequeID
+                + "&flowOperate=" + flowOperate;
+
             appPhysical.OpenWebView(url, "流程审批");
         },
-        showReturnFlow: function(data, flowOperate) {
-            var url = "/Form/OpenURL?url=/Apps/workflow/WorkReturnSelect.html?WorkInfoID=" 
-            + data.WorkInfoID
-            + "&SequeID=" + data.SequeID
-            + "&flowOperate=" + flowOperate;
+        showReturnFlow: function (data, flowOperate) {
+            var url = "/Form/OpenURL?url=/Apps/workflow/WorkReturnSelect.html?WorkInfoID="
+                + data.WorkInfoID
+                + "&SequeID=" + data.SequeID
+                + "&flowOperate=" + flowOperate;
 
             appPhysical.OpenWebView(url, "流程审批");
         },
         //选择流程
         selectWorkFlow: function (flowOperate) {
             var url = "/Form/OpenURL?url=/Apps/workflow/WorkNodeSelect.html?KeyWord="
-            + formconfig.config.joindata.KeyWord 
-            + "&KeyValue=" + formconfig.KeyValue 
-            + "&FormID=" + FormId 
-            + "&flowOperate=" 
-            + flowOperate;
+                + formconfig.config.joindata.KeyWord
+                + "&KeyValue=" + formconfig.KeyValue
+                + "&FormID=" + FormId
+                + "&flowOperate="
+                + flowOperate;
 
             appPhysical.OpenWebView(url, "流程审批");
         },
         // 处理送审的参数
-        checkActivesParams: function(params, flowOperate, callback) {
+        checkActivesParams: function (params, flowOperate, callback) {
             var that = this;
             var data = that.flowSaveValid(params);
             var result = JSON.parse(data.jsonData);
@@ -1952,7 +1952,7 @@ function AppForm() {
             postInfo.OpenTrans = "true";
             //要保存的数据包 
             postInfo[flowOperate] = msg;
-    
+
             dataStatus[flowOperate] = {};
             //数据已经准备完毕
             dataStatus[flowOperate].Complete = true;
@@ -1962,7 +1962,7 @@ function AppForm() {
             }
         },
         // 回收参数处理
-        checkGetBackParams:  function(params, flowOperate, callback) {
+        checkGetBackParams: function (params, flowOperate, callback) {
             var that = this;
             var data = that.flowSaveValid(params);
             var result = JSON.parse(data.jsonData);
@@ -1994,7 +1994,7 @@ function AppForm() {
             postInfo.OpenTrans = "true";
             //要保存的数据包
             postInfo[flowOperate] = msg;
-    
+
             dataStatus[flowOperate] = {};
             //数据已经准备完毕
             dataStatus[flowOperate].Complete = true;
@@ -2004,7 +2004,7 @@ function AppForm() {
             }
         },
         // 获取送审的参数
-        getFlowParameter: function() {
+        getFlowParameter: function () {
             var data = {
                 FormId: formConfig.FormId,
                 KeyValue: formConfig.KeyValue,
@@ -2014,8 +2014,8 @@ function AppForm() {
             };
 
             if (!data.KeyValue) {
-                data.KeyValue = 
-                formConfig.config.joindata.currow[formConfig.config.joindata.keyfield];
+                data.KeyValue =
+                    formConfig.config.joindata.currow[formConfig.config.joindata.keyfield];
             }
 
             if (!data.WorkInfoID) {
@@ -2027,55 +2027,55 @@ function AppForm() {
             return data;
         },
         // 流程绑定事件
-        workflowEvents: function() {
+        workflowEvents: function () {
             var that = this;
 
             // 监控
-            $("#workFlow_action_ShowMonitor").on("tap", function() {
-                if (!formConfig.FormId || 
-                    !formConfig.KeyValue ) {
+            $("#workFlow_action_ShowMonitor").on("tap", function () {
+                if (!formConfig.FormId ||
+                    !formConfig.KeyValue) {
                     mui.alert("FormId和KeyValue不能为空");
                     return false;
                 }
                 var data = that.getFlowParameter();
 
                 that.toggleActionSheet();
-                that.getMonitorLists(data.WorkInfoID, function(ResultInfo) {
+                that.getMonitorLists(data.WorkInfoID, function (ResultInfo) {
                     var histortMind = ResultInfo.HistoryMind;
-                     //整个流程是否已结束时
+                    //整个流程是否已结束时
                     var isEnd = true;
                     var node;
                     for (var i = 0; i < histortMind.length; i++) {
                         node = histortMind[i];
-                        if (node.InboxStatus == (20|| 40) ) {
+                        if (node.InboxStatus == (20 || 40)) {
                             isEnd = false;
                             break;
                         }
                     }
 
-                    that.checkMonitorDataList(isEnd, histortMind, function(data) {
+                    that.checkMonitorDataList(isEnd, histortMind, function (data) {
                         that.monitorDataTemp(data);
                         $(".monitor-content").addClass("move-animation-back").removeClass("move-animation-start");
                     });
                 });
             });
             // 送审
-            $("#workFlow_action_Active").on("tap", function() {
-                if (!formConfig.FormId || 
-                    !formConfig.KeyValue ) {
+            $("#workFlow_action_Active").on("tap", function () {
+                if (!formConfig.FormId ||
+                    !formConfig.KeyValue) {
                     mui.alert("FormId和KeyValue不能为空");
                     return false;
                 }
                 var data = that.getFlowParameter();
-                
+
                 that.toggleActionSheet();
-                that.checkActivesParams(null, "Update", function(dataStatus, postInfo) {
-                    that.saveFormWorkFlow(dataStatus, postInfo, function(returnData) {
+                that.checkActivesParams(null, "Update", function (dataStatus, postInfo) {
+                    that.saveFormWorkFlow(dataStatus, postInfo, function (returnData) {
                         var getData = JSON.parse(returnData);
 
                         if (getData.success) {
                             mui.toast("保存成功");
-                            that.showActionFlow(data,"Active");
+                            that.showActionFlow(data, "Active");
                         } else {
                             mui.alert(getData.message);
                             return false;
@@ -2084,22 +2084,22 @@ function AppForm() {
                 });
             });
             // 同意
-            $("#workFlow_action_Send").on("tap", function() {
-                if (!formConfig.FormId || 
-                    !formConfig.KeyValue ) {
+            $("#workFlow_action_Send").on("tap", function () {
+                if (!formConfig.FormId ||
+                    !formConfig.KeyValue) {
                     mui.alert("FormId和KeyValue不能为空");
                     return false;
                 }
                 var data = that.getFlowParameter();
-                
+
                 that.toggleActionSheet();
-                that.checkActivesParams(null, "Update", function(dataStatus, postInfo) {
-                    that.saveFormWorkFlow(dataStatus, postInfo, function(returnData) {
+                that.checkActivesParams(null, "Update", function (dataStatus, postInfo) {
+                    that.saveFormWorkFlow(dataStatus, postInfo, function (returnData) {
                         var getData = JSON.parse(returnData);
 
                         if (getData.success) {
                             mui.toast("保存成功");
-                            that.showSendFlow(data,"Send");
+                            that.showSendFlow(data, "Send");
                         } else {
                             mui.alert(getData.message);
                             return false;
@@ -2108,22 +2108,22 @@ function AppForm() {
                 });
             });
             // 驳回
-            $("#workFlow_action_Return").on("tap", function() {
-                if (!formConfig.FormId || 
-                    !formConfig.KeyValue ) {
+            $("#workFlow_action_Return").on("tap", function () {
+                if (!formConfig.FormId ||
+                    !formConfig.KeyValue) {
                     mui.alert("FormId和KeyValue不能为空");
                     return false;
                 }
                 var data = that.getFlowParameter();
-                
+
                 that.toggleActionSheet();
-                that.checkActivesParams(null, "Update", function(dataStatus, postInfo) {
-                    that.saveFormWorkFlow(dataStatus, postInfo, function(returnData) {
+                that.checkActivesParams(null, "Update", function (dataStatus, postInfo) {
+                    that.saveFormWorkFlow(dataStatus, postInfo, function (returnData) {
                         var getData = JSON.parse(returnData);
 
                         if (getData.success) {
                             mui.toast("保存成功");
-                            that.showReturnFlow(data,"Return");
+                            that.showReturnFlow(data, "Return");
                         } else {
                             mui.alert(getData.message);
                             return false;
@@ -2132,22 +2132,22 @@ function AppForm() {
                 });
             });
             // 回收
-            $("#workFlow_action_GetBack").on("tap", function() {
-                if (!formConfig.FormId || 
-                    !formConfig.KeyValue ) {
+            $("#workFlow_action_GetBack").on("tap", function () {
+                if (!formConfig.FormId ||
+                    !formConfig.KeyValue) {
                     mui.alert("FormId和KeyValue不能为空");
                     return false;
                 }
                 var data = that.getFlowParameter();
-                
+
                 that.toggleActionSheet();
-                that.checkGetBackParams(null, "GetBack", function(dataStatus, postInfo) {
-                    that.saveFormWorkFlow(dataStatus, postInfo, function(returnData) {
+                that.checkGetBackParams(null, "GetBack", function (dataStatus, postInfo) {
+                    that.saveFormWorkFlow(dataStatus, postInfo, function (returnData) {
                         var getData = JSON.parse(returnData);
                         if (getData.success) {
                             mui.toast("撤回成功");
-                            window.location.href = "/Form/ValidForm/" 
-                            + FormId + "/"+ formConfig.FormState +"/" + formConfig.KeyValue + "/";
+                            window.location.href = "/Form/ValidForm/"
+                                + FormId + "/" + formConfig.FormState + "/" + formConfig.KeyValue + "/";
                         } else {
                             mui.alert(getData.message);
                             return false;
@@ -2157,13 +2157,13 @@ function AppForm() {
             });
         },
         // 获取报表数据
-        getReport: function(callback) {
+        getReport: function (callback) {
             var that = this;
             var formid = formConfig.FormId;
             var params = {
                 FormId: formid
             };
-            that._APIAjax(params, function(data) {
+            that._APIAjax(params, function (data) {
                 var getData = JSON.parse(data);
                 if (!!getData.data.value) {
                     if (callback) {
@@ -2215,19 +2215,19 @@ function AppForm() {
             return arr;
         },
         // 报表的渲染模板
-        reportListTemp: function(data, targetContent) {
+        reportListTemp: function (data, targetContent) {
             var html = '';
-            data.forEach(function(item, index) {
-                html += '<li data-title = "'+ item.Name + "." + item.ExpType +'" data-link="'+ item.url +'" class="mui-table-view-cell">' +
+            data.forEach(function (item, index) {
+                html += '<li data-title = "' + item.Name + "." + item.ExpType + '" data-link="' + item.url + '" class="mui-table-view-cell">' +
                     '<a class="mui-navigate-right report">' +
-                    '<span>'+ item.Name + "." + item.ExpType +'</span>' +
+                    '<span>' + item.Name + "." + item.ExpType + '</span>' +
                     '</a>' +
                     '</li>';
             });
 
             $("#" + targetContent).html(html);
 
-            $("#" + targetContent + " .mui-table-view-cell").on("tap", function() {
+            $("#" + targetContent + " .mui-table-view-cell").on("tap", function () {
                 var $this = $(this);
                 var link = $this.attr("data-link");
                 var title = $this.attr("data-title");
@@ -2236,7 +2236,7 @@ function AppForm() {
             });
         },
         // 获取评论数据
-        getComment: function(callback) {
+        getComment: function (callback) {
             var that = this;
             var formid = formConfig.FormId;
             var params = {
@@ -2244,7 +2244,7 @@ function AppForm() {
                 KeyWord: formConfig.config.joindata.KeyWord,
                 KeyValue: formConfig.KeyValue
             };
-            that._APIAjax(params, function(data) {
+            that._APIAjax(params, function (data) {
                 var getData = JSON.parse(data);
                 if (getData.success) {
                     callback(getData);
@@ -2254,7 +2254,7 @@ function AppForm() {
             }, "/Form/GetComment");
         },
         // 评论列表渲染模板
-        commentList: function(data, targetContent, callback) {
+        commentList: function (data, targetContent, callback) {
             var item, html = '';
             var that = this;
             var lists = data.data.value;
@@ -2267,19 +2267,19 @@ function AppForm() {
                     return atHtml;
                 }
 
-                AtHumanList.forEach(function(item, index) {
-                    atHtml += '<span class="at-list" data-atid="'+ item.HumanId +'">@' + item.HumanName + '</span>'
+                AtHumanList.forEach(function (item, index) {
+                    atHtml += '<span class="at-list" data-atid="' + item.HumanId + '">@' + item.HumanName + '</span>'
                 });
                 return atHtml;
             }
             // 订阅checkbox
             $("#subscribe").prop("checked", Subscribe == "Y");
 
-            lists = lists.sort(function(a, b) {
+            lists = lists.sort(function (a, b) {
                 return new Date(a.RegDate).getTime() - new Date(b.RegDate).getTime();
             });
 
-            lists.forEach(function(item, index) {
+            lists.forEach(function (item, index) {
                 var RegHumId = item.RegHumId;
                 var AtHumanList = item.AtHumanList;
 
@@ -2288,34 +2288,34 @@ function AppForm() {
                 }
                 if (HumanId == RegHumId) {
                     html += '<div class="comment-history-list right">' +
-                    '<p class="time-send">' +
-                    '<span> '+ that._formatDate(item.RegDate) +'</span>' +
-                    '<span>'+ item.RegHumName +' </span>' +
-                    '</p>' +
-                    '<div class="list-wrap">' +
-                    '<div class="list-text">' +
-                    '<span class="text right">'+ atList(AtHumanList) + item.CommentText  +' </span>' +
-                    '</div>' +
-                    '<div class="avatar-wrap">' +
-                    '<img src="'+ item.RegHeader +'" alt="">' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>';
+                        '<p class="time-send">' +
+                        '<span> ' + that._formatDate(item.RegDate) + '</span>' +
+                        '<span>' + item.RegHumName + ' </span>' +
+                        '</p>' +
+                        '<div class="list-wrap">' +
+                        '<div class="list-text">' +
+                        '<span class="text right">' + atList(AtHumanList) + item.CommentText + ' </span>' +
+                        '</div>' +
+                        '<div class="avatar-wrap">' +
+                        '<img src="' + item.RegHeader + '" alt="">' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
                 } else {
                     html += '<div class="comment-history-list left">' +
-                    '<p class="time-send">' +
-                    '<span>'+ item.RegHumName +' </span>' +
-                    '<span >'+ that._formatDate(item.RegDate) +'</span>' +
-                    '</p>' +
-                    '<div class="list-wrap">' +
-                    '<div class="avatar-wrap">' +
-                    '<img src="'+ item.RegHeader +'" alt="">' +
-                    '</div>' +
-                    '<div class="list-text">' +
-                    '<span class="text left">'+ atList(AtHumanList) + item.CommentText +'</span>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>';
+                        '<p class="time-send">' +
+                        '<span>' + item.RegHumName + ' </span>' +
+                        '<span >' + that._formatDate(item.RegDate) + '</span>' +
+                        '</p>' +
+                        '<div class="list-wrap">' +
+                        '<div class="avatar-wrap">' +
+                        '<img src="' + item.RegHeader + '" alt="">' +
+                        '</div>' +
+                        '<div class="list-text">' +
+                        '<span class="text left">' + atList(AtHumanList) + item.CommentText + '</span>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
                 }
             });
 
@@ -2345,7 +2345,7 @@ function AppForm() {
                 Subscribe: sub_value
             }
 
-            that._ajax(url, params, "get", false, function(data) {
+            that._ajax(url, params, "get", false, function (data) {
                 var getData = JSON.parse(data);
                 if (callback) {
                     callback(getData, params.Subscribe);
@@ -2355,25 +2355,25 @@ function AppForm() {
         // 发送评论
         onPostComment: function (callback) {
             var that = this;
-            var Send_comment =  $("#Send_comment_text");
-            var send_comment_text = $.trim( Send_comment.val() );
+            var Send_comment = $("#Send_comment_text");
+            var send_comment_text = $.trim(Send_comment.val());
 
             if (!send_comment_text) {
                 mui.alert("发送内容不能为空");
                 return false;
             }
             Send_comment.blur();
-            
+
             var json = {
-                FormId: formConfig.FormId, 
+                FormId: formConfig.FormId,
                 KeyWord: formConfig.config.joindata.KeyWord,
                 KeyValue: formConfig.KeyValue,
                 CommentText: send_comment_text,
                 AtHumanList: []
             };
-            selectedAtHuman.forEach(function(item) {
+            selectedAtHuman.forEach(function (item) {
                 json.AtHumanList.push({
-                    HumanId : item.Id,
+                    HumanId: item.Id,
                     HumanName: item.Name
                 });
             });
@@ -2381,7 +2381,7 @@ function AppForm() {
                 jsonData: JSON.stringify(json)
             }
 
-            that._APIAjax(params, function(data) {
+            that._APIAjax(params, function (data) {
                 var getData = that.stringify(data);
                 if (getData.success) {
                     mui.toast("发送成功");
@@ -2394,7 +2394,7 @@ function AppForm() {
             }, "/Form/PostComment");
         },
         // 获取At 人员向导
-        getAtHumans: function(where, callback) {
+        getAtHumans: function (where, callback) {
             var that = this;
             var params = {
                 KeyWord: "Human",
@@ -2413,7 +2413,7 @@ function AppForm() {
             }
 
             //此处修改上方查询字段
-            var searchKey = $.trim( $("#search_wizard").val() );
+            var searchKey = $.trim($("#search_wizard").val());
             if (searchKey) {
                 params.swhere += " and (Name like '%" + searchKey + "%' or Code like '%" + searchKey + "%')";
             }
@@ -2438,14 +2438,14 @@ function AppForm() {
                         if (getData.data.value != "") {
                             callback(JSON.parse(getData.data.value));
                         }
-                    }             
+                    }
                 }
             });
         },
-        filerSelectedAtHuman: function(id) {
+        filerSelectedAtHuman: function (id) {
             var arr = [];
             var can = true;
-            selectedAtHuman.forEach(function(item) {
+            selectedAtHuman.forEach(function (item) {
                 if (id != item.Id) {
                     arr.push(item);
                 } else {
@@ -2458,17 +2458,17 @@ function AppForm() {
             };
         },
         //At 人员向导模板
-        atHumansTemp: function(data, targetId) {
+        atHumansTemp: function (data, targetId) {
             var html = '', item, that = this;
-            data.forEach(function(item, index) {
-                html += '<li data-code="'+ item.Code +'" data-name="'+ item.Name +'" data-id = "'+ item.Id +'" class="mui-table-view-cell mui-media">' +
+            data.forEach(function (item, index) {
+                html += '<li data-code="' + item.Code + '" data-name="' + item.Name + '" data-id = "' + item.Id + '" class="mui-table-view-cell mui-media">' +
                     '<div>' +
-                    '<div class="mui-media-object mui-checkbox mui-pull-left">' + 
+                    '<div class="mui-media-object mui-checkbox mui-pull-left">' +
                     '<input name="checkbox" type="checkbox" >' +
-                    '</div>'+
+                    '</div>' +
                     '<div class="mui-media-body">' +
-                    '<span>'+ item.Name +'</span>' +
-                    '<p class="mui-ellipsis">'+ item.Code +'</p>' +
+                    '<span>' + item.Name + '</span>' +
+                    '<p class="mui-ellipsis">' + item.Code + '</p>' +
                     '</div>' +
                     '</div>' +
                     '</li>';
@@ -2476,7 +2476,7 @@ function AppForm() {
 
             $("#" + targetId).html(html);
 
-            $("#" + targetId).find(".mui-media-body, .mui-checkbox").on("tap", function() {
+            $("#" + targetId).find(".mui-media-body, .mui-checkbox").on("tap", function () {
                 var $this = $(this);
                 var row = $this.closest(".mui-table-view-cell");
                 var id = row.attr("data-id");
@@ -2502,27 +2502,27 @@ function AppForm() {
                 }
             });
 
-            $("#" + targetId).find("input").on("tap", function() {
+            $("#" + targetId).find("input").on("tap", function () {
                 var $this = $(this);
                 var row = $this.closest(".mui-table-view-cell");
                 row.toggleClass("selected");
             });
         },
         //At 人员完成选择
-        afterSelectedAtHuman: function(callback) {
+        afterSelectedAtHuman: function (callback) {
             var arr = [], that = this;
-            $("#wizard_lists > .mui-table-view-cell.selected").each(function() {
+            $("#wizard_lists > .mui-table-view-cell.selected").each(function () {
                 var $this = $(this);
                 var obj = {
                     Name: $this.attr("data-name"),
                     Code: $this.attr("data-code"),
                     Id: $this.attr("data-id")
                 };
-                
+
                 arr.push(obj);
             });
 
-            if ( (selectedAtHuman.length + arr.length) > 3 ) {
+            if ((selectedAtHuman.length + arr.length) > 3) {
                 mui.alert("@人员名单超过三个,请重新选择");
                 return false;
             }
@@ -2535,9 +2535,9 @@ function AppForm() {
             }
         },
         // 删除At缓存中的人员
-        deleteAtHuman: function(id) {
+        deleteAtHuman: function (id) {
             var arr = [];
-            selectedAtHuman.forEach(function(item) {
+            selectedAtHuman.forEach(function (item) {
                 if (id != item.Id) {
                     arr.push(item);
                 }
@@ -2546,17 +2546,17 @@ function AppForm() {
             selectedAtHuman = arr;
         },
         //At 人员选择后的渲染模板
-        atSelectedLists: function(data, targetId) {
+        atSelectedLists: function (data, targetId) {
             var html = "", that = this;
-            data.forEach(function(item, index) {
-                html += '<span data-id="'+ item.Id +'" data-code="'+ item.Code +'" class="list-human">' +
-                    '<label>'+ item.Name +'</label>' +
+            data.forEach(function (item, index) {
+                html += '<span data-id="' + item.Id + '" data-code="' + item.Code + '" class="list-human">' +
+                    '<label>' + item.Name + '</label>' +
                     '<i class="mui-icon mui-icon-closeempty"></i>' +
                     '</span>';
             });
 
             $("#" + targetId).html(html);
-            $("#" + targetId).find(".mui-icon-closeempty").on("tap", function(e) {
+            $("#" + targetId).find(".mui-icon-closeempty").on("tap", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -2572,10 +2572,10 @@ function AppForm() {
             this.componentInit();
 
             //加载数据的入口
-            this.load(options, function() {
+            this.load(options, function () {
                 // 如果有自定义的回调 执行此回调
                 if (callback) {
-                    callback(formConfig, config, optionDiy, configsMap );
+                    callback(formConfig, config, optionDiy, configsMap);
                 }
             });
         },
@@ -2608,7 +2608,7 @@ function AppForm() {
             that.closeWizardIframeContent();
         },
         // 关闭向导iframe之后的操作
-        closeWizardIframe: function (data, wizard_origin_key, wizard_origin ) {
+        closeWizardIframe: function (data, wizard_origin_key, wizard_origin) {
             var that = appForm;
             var keyword = wizard_origin_key.split(".")[0];
             var key = wizard_origin_key.split(".")[1];
@@ -2629,27 +2629,27 @@ function AppForm() {
 
             var that = this;
 
-            that._checkPlat(function(tag) {
+            that._checkPlat(function (tag) {
                 if (tag == "iPhone") {
                     $("#UploadFileAll").addClass("hide");
                 }
             });
 
             //打开日期选择器
-            $(".btn-picker").on("tap", function() {
+            $(".btn-picker").on("tap", function () {
                 var $this = $(this);
                 $("input").blur();
 
                 if ($this.prop("readonly")) {
                     return false;
                 } else {
-                    that._openDtPicker({}, function(data) {
+                    that._openDtPicker({}, function (data) {
                         $this.val(data.text).blur();
                     });
                 }
             });
             //打开通用选择器
-            $("input.mui-select").on("tap", function() {
+            $("input.mui-select").on("tap", function () {
                 var $this = $(this);
                 var readonly = $this.prop("readonly");
                 var keyword = $this.attr("data-keyword");
@@ -2674,13 +2674,13 @@ function AppForm() {
 
                 $("input").blur();
 
-                that._openPicker(selectData, function(data) {
+                that._openPicker(selectData, function (data) {
                     $this.val(data.text).blur();
                 });
             });
 
             // 打开向导
-            $(".mui-wizard").on("tap", function() {
+            $(".mui-wizard").on("tap", function () {
                 var $this = $(this);
                 var readonly = $this.prop("readonly");
                 var keyword = $this.attr("data-keyword");
@@ -2707,7 +2707,7 @@ function AppForm() {
                     WizardIframe.attr("src", url);
 
                     that._loading("加载中");
-                    WizardIframe.on("load", function() {
+                    WizardIframe.on("load", function () {
                         that._closeLoading();
                         that.openWizardIframeContent();
                     });
@@ -2717,74 +2717,74 @@ function AppForm() {
                 }
             });
             // 关闭向导
-            $("#close_wizard").on("tap", function() {
+            $("#close_wizard").on("tap", function () {
                 that.closeWizardBefore();
                 $(".mui-wizard-content").addClass("move-animation-start").removeClass("move-animation-back");
             });
             // 向导搜索功能
-            $("#search_wizard").on("change", function() {
+            $("#search_wizard").on("change", function () {
                 var $this = $(this);
-                var searchKey = $.trim( $this.val() );
+                var searchKey = $.trim($this.val());
                 var target = $("#complete_wizard").attr("data-target");
                 if (target == "mainTable") {
                     that.getWizardList(searchKey);
                 } else if (target == "atPeople") {
-                    that.getAtHumans(null, function(data) {
+                    that.getAtHumans(null, function (data) {
                         $(".mui-wizard-content")
                             .addClass("move-animation-back")
                             .removeClass("move-animation-start");
-    
+
                         that.atHumansTemp(data, "wizard_lists");
                     });
                 }
             });
             // 完成向导选择
-            $("#complete_wizard").on("tap", function() {
+            $("#complete_wizard").on("tap", function () {
                 var $this = $(this);
                 var target = $this.attr("data-target");
 
                 if (target == "atPeople") {
-                    that.afterSelectedAtHuman(function() {
+                    that.afterSelectedAtHuman(function () {
                         that.closeWizardBefore();
                     });
                 }
             });
 
             // 子表点击关闭，关闭子表form显示面板, 面板上的数据清空
-            $(".children-table-form .close-child-table").on("tap", function(e) {
+            $(".children-table-form .close-child-table").on("tap", function (e) {
                 var $this = $(this);
                 var form = $this.closest(".children-table-form");
 
                 form.addClass("move-animation-start").removeClass("move-animation-back");
-                form.find("input, textarea").each(function() {
+                form.find("input, textarea").each(function () {
                     $(this).parent().removeClass("mui-required");
                     $(this).val("");
                 });
             });
             // 保存子表数据
-            $(".children-table-form .save-child-table").on("tap", function(e) {
+            $(".children-table-form .save-child-table").on("tap", function (e) {
                 var $this = $(this);
                 var form = $this.closest(".children-table-form");
                 var id = form.attr("id");
                 var keyword = id.replace("_Form", "");
 
-                that.SaveChildrenTable(keyword, function() {
+                that.SaveChildrenTable(keyword, function () {
                     // 子表配置数据获取
-                    configs =  that.ConfigToList(config);
+                    configs = that.ConfigToList(config);
                     // 初始化子表配置
                     that.childrenTableCondigInit(configs, optionDiy);
                 });
             });
 
             // 点击新增按钮 新增子表 
-            $(".add-table-list").on("tap", function() {
+            $(".add-table-list").on("tap", function () {
                 var $this = $(this);
                 var form = $this.closest(".mui-control-content").find(".children-table-form");
 
                 if (formConfig.FormState != "view") {
                     form.addClass("move-animation-back").removeClass("move-animation-start");
                     form.find("input").prop("readonly", false);
-    
+
                     formConfig.table_state = "added";
                     formConfig.table_data_list_id = "";
                 } else {
@@ -2792,7 +2792,7 @@ function AppForm() {
                 }
             });
             // 点击删除按钮 显示checkbox 和确认删除面板
-            $(".delete-table-list").on("tap", function() {
+            $(".delete-table-list").on("tap", function () {
                 var $this = $(this);
                 var actionBlock = $this.closest(".action-table");
                 var form = $this.closest(".mui-control-content").find(".mui-table-view");
@@ -2805,7 +2805,7 @@ function AppForm() {
                 }
             });
             // 点击返回按钮 隐藏checkbox 和确认删除面板
-            $(".delete-table-back").on("tap", function() {
+            $(".delete-table-back").on("tap", function () {
                 var $this = $(this);
                 var actionBlock = $this.closest(".action-table");
                 var form = $this.closest(".mui-control-content").find(".mui-table-view");
@@ -2814,7 +2814,7 @@ function AppForm() {
                 actionBlock.addClass("hide").prev().removeClass("hide");
             });
             // 点击确认删除按钮 执行删除子表数据
-            $(".delete-table-lists").on("tap", function() {
+            $(".delete-table-lists").on("tap", function () {
                 var $this = $(this);
                 var actionBlock = $this.closest(".action-table");
                 var form = $this.closest(".mui-control-content").find(".mui-table-view");
@@ -2822,46 +2822,46 @@ function AppForm() {
                 var right = keywordright[keyword];
                 var disabledRight = that.disabledRight();
 
-                mui.confirm("确认删除?", "确认删除",["否", "是"], function(e) {
+                mui.confirm("确认删除?", "确认删除", ["否", "是"], function (e) {
                     if (e.index == 1) {
-                        that.deleteTableLists(keyword, "BO", function(data, lis) {
+                        that.deleteTableLists(keyword, "BO", function (data, lis) {
                             if (data.success) {
                                 lis.remove();
                             } else {
                                 mui.alert(data.message);
                             }
                         }, "outLine");
-    
+
                         form.find(".mui-icon").removeClass("hide");
                         form.find("input[type=checkbox]").addClass("hide");
                         actionBlock.addClass("hide").prev().removeClass("hide");
                     }
                 });
             });
-            
+
             // 点击附件按钮，加载附件
-            $("#attach_action").on("tap", function(e) {
+            $("#attach_action").on("tap", function (e) {
                 // 加载附件
-                that.getDocFiles(function(dataMap) {
+                that.getDocFiles(function (dataMap) {
                     that.docFilesTemp(dataMap);
                 });
             });
 
             // 查看报表
-            $("#report_action").on("tap", function() {
-                that.getReport(function(data) {
+            $("#report_action").on("tap", function () {
+                that.getReport(function (data) {
                     var res = that.checkReportData(data);
                     that.reportListTemp(res, "ReportLists");
                 });
             })
 
             // 操作表显示和隐藏
-            $("#Action_btn").on("tap",function() {
+            $("#Action_btn").on("tap", function () {
                 that.toggleActionSheet();
             });
 
             // 关闭监控面板
-            $(".close-monitor-content").on("tap", function() {
+            $(".close-monitor-content").on("tap", function () {
                 var $this = $(this);
                 var top_block = $this.closest(".monitor-content");
 
@@ -2869,8 +2869,8 @@ function AppForm() {
             });
 
             // 启用评论订阅功能
-            $("#subscribe").on("tap", function() {
-                that.onSubScribe(function(data, sub) {
+            $("#subscribe").on("tap", function () {
+                that.onSubScribe(function (data, sub) {
                     if (data.success) {
                         if (sub == "Y") {
                             mui.toast("订阅成功");
@@ -2884,14 +2884,14 @@ function AppForm() {
             });
 
             // 发送评论
-            $("#send_btn").on("tap", function() {
-                that.onPostComment(function(res) {
+            $("#send_btn").on("tap", function () {
+                that.onPostComment(function (res) {
                     selectedAtHuman = [];
                     $("#Send_comment_text").val("");
                     that.atSelectedLists(selectedAtHuman, "selected_lists");
-                    that.getComment(function(data) {
+                    that.getComment(function (data) {
                         var commentObj = $.extend({}, data);
-                        that.commentList(data, "comment_history", function() {
+                        that.commentList(data, "comment_history", function () {
                             $("#comment_lists_wrap").scrollTop($("#comment_lists_wrap")[0].scrollHeight);
                         });
                     });
@@ -2899,23 +2899,23 @@ function AppForm() {
             });
 
             // 点击评论tab页签，在加载评论内容
-            $("#comment_action").on("tap", function() {
-                that.getComment(function(data) {
+            $("#comment_action").on("tap", function () {
+                that.getComment(function (data) {
                     var commentObj = $.extend({}, data);
-                    that.commentList(data, "comment_history", function() {
+                    that.commentList(data, "comment_history", function () {
                         $("#comment_lists_wrap").scrollTop($("#comment_lists_wrap")[0].scrollHeight);
                     });
                 });
             });
 
             // 点击@，展开@人员向导
-            $("#at_wizard").on("tap", function(e) {
+            $("#at_wizard").on("tap", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
 
                 var $this = $(this);
                 var option = $this.attr("data-option");
-                    
+
                 if (option) {
                     option = JSON.parse(option);
                     that.openWizardBefore(option);
@@ -2924,7 +2924,7 @@ function AppForm() {
                     return false;
                 }
 
-                that.getAtHumans(null, function(data) {
+                that.getAtHumans(null, function (data) {
                     $(".mui-wizard-content.at-wizard")
                         .addClass("move-animation-back")
                         .removeClass("move-animation-start");
@@ -2933,10 +2933,10 @@ function AppForm() {
                 });
             });
 
-            
+
             // 留给原生App上传附件成功之后调用
-            window.MobileWebFormLoadFile = function() {
-                that.getDocFiles(function(dataMap) {
+            window.MobileWebFormLoadFile = function () {
+                that.getDocFiles(function (dataMap) {
                     that.docFilesTemp(dataMap);
                 });
             };
@@ -2946,7 +2946,7 @@ function AppForm() {
             that.upLoadAttachEvents(formConfig);
         },
         // 加载 数据加载的入口
-        load: function(options, callback) {
+        load: function (options, callback) {
             var that = this;
             config = that.getConfig(formConfig.config.joindata.KeyWord);
 
@@ -2954,7 +2954,7 @@ function AppForm() {
             optionDiy = options;
 
             // 加载主表数据
-            that.getMainTable(formConfig, function(data) {
+            that.getMainTable(formConfig, function (data) {
                 var getData = {};
                 if (data) {
                     getData = JSON.parse(data);
@@ -2965,7 +2965,7 @@ function AppForm() {
                     that.setMainTable(getData, config);
 
                     // 子表配置数据获取
-                    configs =  that.ConfigToList(config);
+                    configs = that.ConfigToList(config);
                     // 初始化子表配置
                     that.childrenTableCondigInit(configs, optionDiy);
 
@@ -2976,7 +2976,7 @@ function AppForm() {
                     that.setFlowResult();
 
                     // 获取子表数据
-                    that.loadChildrenTable(optionDiy, "all", function(table) {
+                    that.loadChildrenTable(optionDiy, "all", function (table) {
                         that.getChildrenTable(table);
                     });
 
