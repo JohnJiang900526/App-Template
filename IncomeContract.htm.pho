@@ -374,14 +374,15 @@
                         },
                         center: {
                             value: "PayAmount", // 中间显示的字段
-                            format: "",
-                            name: '收款金额'
+                            format: "number",
+                            name: '收款金额',
+                            toFixed: 4
                         },
-                        right: {
-                            value: "PayDescription", // 右边显示的字段
-                            format: "",
-                            name: '节点描述'
-                        }
+                        // right: {
+                        //     value: "PayDescription", // 右边显示的字段
+                        //     format: "",
+                        //     name: '节点描述'
+                        // }
                     }
                 }
             }

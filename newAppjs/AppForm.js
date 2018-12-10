@@ -1068,7 +1068,8 @@ function AppForm() {
                     '<div class="mui-media-body">' +
                     '<p class="mui-ellipsis list-title">' + title + '</p>' +
                     '<div class="list-units">' +
-                    left + center + right + '</div>' +
+                    left + center + right + 
+                    '</div>' +
                     '</div>' +
                     '</div>' +
                     '</div>' +

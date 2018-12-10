@@ -274,10 +274,18 @@ var Util = {
                         break;
                     case 'number':
                         var typeOf = typeof row[htmlparams[type].value];
+                        var toFixed = htmlparams[type].toFixed;
+
                         if (typeOf == "number") {
-                            result = row[htmlparams[type].value]
+                            result = row[htmlparams[type].value] + ''
                         } else {
                             result = new Number(row[htmlparams[type].value]);
+                        }
+
+                        if (toFixed) {
+                            result = new Number(result).toFixed(toFixed);
+                        } else {
+                            result = new Number(result).toFixed(2);
                         }
                         break;
                     case 'datePicker':
