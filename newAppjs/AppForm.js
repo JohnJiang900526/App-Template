@@ -1112,10 +1112,22 @@ function AppForm() {
                                         childDom.prop("readonly", true);
                                     }
                                 }
-
+                                
+                                // 日期类型
                                 if (childDom.hasClass("btn-picker")) {
                                     var formatTime = childDom.attr("data-format");
                                     value = that._formatDate(value, formatTime);
+                                }
+                                // 数字类型
+                                var dataType = childDom.attr("type");
+                                if (dataType == "number") {
+                                    var numberToFixed = childDom.attr('data-fix');
+                                    if (numberToFixed) {
+                                        var ToFixed = new Number(numberToFixed);
+                                        value = new Number(value).toFixed(ToFixed);
+                                    } else {
+                                        value = new Number(value).toFixed(2)
+                                    }
                                 }
 
                                 childDom.val(value);
