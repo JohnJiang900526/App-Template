@@ -1,0 +1,429 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="no" />
+    <title></title>
+
+    <link href="/Apps/js/mui/css/mui.min.css?v=$AppVersion" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=$AppVersion" rel="stylesheet" type="text/css" />
+    <link href="/Apps/style/newForm.css?v=$AppVersion" rel="stylesheet" type="text/css" />
+    <style>
+        .mui-content.mui-wizard-content {
+            padding-top: 0px;
+        }
+
+        .mui-indexed-list-inner {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 50px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mui-content mui-wizard-content move-animation-back">
+        <header class="mui-bar mui-bar-nav">
+            <a id="close_wizard" class="mui-btn mui-btn-link mui-pull-left mui-btn-blue">关闭</a>
+            <h1 id="wizard_title" class="mui-title"></h1>
+            <a id="complete_wizard" class="mui-btn mui-btn-link mui-pull-right mui-btn-blue" data-target="mainTable">完成</a>
+        </header>
+        <div class="mui-indexed-list">
+            <div class="mui-indexed-list-search mui-input-row mui-search">
+                <input id="search_wizard" type="search" class="mui-input-clear mui-indexed-list-search-input" placeholder="搜索">
+            </div>
+            <div class="mui-indexed-list-inner">
+                <div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+                    <div class="mui-scroll">
+                        <ul id="wizard_lists_iframe" class="mui-table-view"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="/Apps/js/jquery-1.8.3.min.js?v=$AppVersion" type="text/javascript"></script>
+<script src="/Apps/js/mui/js/mui.min.js?v=$AppVersion" type="text/javascript"></script>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=$AppVersion" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=$AppVersion"></script>
+<script type="text/javascript">
+    (function (mui, $) {
+        $(function () {
+            var wizardCurrentKeyMap = {
+                ComponentID: "",
+                btnid: "",
+                formid: "",
+                config: {},
+                data: [],
+                selectWizard: []
+            };
+
+            var load_wizard = {
+                // ajax封装
+                _ajax: function (url, params, type, cache, callback) {
+                    var that = this;
+
+                    that._loading();
+                    $.ajax({
+                        url: url,
+                        data: params,
+                        type: type,
+                        cache: cache,
+                        success: function (data) {
+                            that._closeLoading();
+                            if (callback) {
+                                callback(data);
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            that._closeLoading();
+                            mui.alert(jqXHR.responseText, textStatus, errorThrown);
+                        }
+                    });
+                },
+                _APIAjax: function (params, callback, reUrl) {
+                    var that = this;
+
+                    var url = "/API/APIMessages";
+                    if (reUrl) {
+                        url = reUrl;
+                    }
+                    that._ajax(url, params, "POST", false, callback);
+                },
+                // 自定义时间格式 ：format
+                // "yyyy-MM-dd HH:mm:ss";"yyyy-MM-dd-HH-mm-ss"
+                // "yyyy-MM-ddTHH:mm:ss" ....
+                _formatDate: function (time, format) {
+                    var t = new Date(time);
+                    if (t.getTime() == 0) {
+                        t = new Date();
+                    }
+
+                    var tf = function (i) {
+                        return (i < 10 ? '0' : '') + i;
+                    };
+                    if (!format) {
+                        format = "yyyy-MM-dd";
+                    }
+
+                    return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function (type) {
+                        switch (type) {
+                            case 'yyyy':
+                                return tf(t.getFullYear());
+                            case 'MM':
+                                return tf(t.getMonth() + 1);
+                            case 'mm':
+                                return tf(t.getMinutes());
+                            case 'dd':
+                                return tf(t.getDate());
+                            case 'HH':
+                                return tf(t.getHours());
+                            case 'ss':
+                                return tf(t.getSeconds());
+                        }
+                    })
+                },
+                // 打开日期组件
+                _openDtPicker: function (option, callback) {
+                    var _self = this;
+                    var options = {
+                        type: "date"
+                    };
+
+                    if (option) {
+                        options = $.extend({}, options, option);
+                    }
+
+                    _self.picker = new mui.DtPicker(options);
+                    _self.picker.show(function (rs) {
+                        if (callback) {
+                            callback(rs);
+                        }
+                        _self.picker.dispose();
+                        _self.picker = null;
+                    });
+                },
+                // 打开选择器组件
+                _openPicker: function (arr, callback) {
+                    var picker = new mui.PopPicker();
+                    picker.setData(arr);
+                    picker.show(function (data) {
+                        if (callback) {
+                            callback(data[0]);
+                        }
+                        picker = null;
+                    });
+                },
+                // 获取连接中的参数,只需要传进对应的名称
+                // file:///E:/myProjects/myTools/test.html?id=1234567&name=john
+                //如上面的例子，只需要传进"id"  或者 "name"
+                _getLocaArg: function () {
+                    var name;
+
+                    if (arguments.length === 0 || arguments.length >= 2) {
+                        throw Error("arguments.length = 1");
+                    } else {
+                        name = arguments[0];
+                    }
+
+                    var pattern = new RegExp("[\?\&]" + name + "=([^\&]+)", "i"),
+                        result = location.search.match(pattern);
+
+                    if (result == null || result.length < 1) {
+                        return "";
+                    }
+                    return result[1];
+                },
+                // loading
+                _loading: function (text) {
+                    if (!text) {
+                        text = "";
+                    }
+                    var html = '<div name="loading" class="loading-pop-content">' +
+                        '<div class="loading-mask-bg"></div>' +
+                        '<div class="loading-main-content">' +
+                        '<div class="loading-icon">' +
+                        '<span class="mui-spinner"></span>' +
+                        '</div>' +
+                        '<div class="loading-text">' +
+                        '<span class="text">' + text + '</span>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
+                    var loadings = $(".loading-pop-content");
+                    if (loadings.size() == 0) {
+                        $(top.document.body).append(html);
+                    }
+                },
+                // 关闭loading
+                _closeLoading: function () {
+                    var loadings = $(top.document.body).find(".loading-pop-content");
+
+                    loadings.each(function () {
+                        var $this = $(this);
+                        var name = $this.attr("name");
+
+                        if (name == "loading") {
+                            $this.remove();
+                        }
+                    });
+                },
+                //GridPageLoad加载数据
+                gridPageLoad: function (p, callback) {
+                    var that = this;
+
+                    var url = p.url || "/Form/GridPageLoad";
+                    p.KeyWordType = p.KeyWordType || "BO";
+                    p.select = p.select || "";
+                    p.sort = p.sort || "";
+                    p.index = p.index || "0";
+                    p.size = p.size || "0";
+                    p.swhere = p.swhere || "";
+                    var _async = typeof (p.async) == "undefined" ? true : p.async;
+                    delete p.async;
+
+                    if (p.swhere) {
+                        var tmp = {};
+                        if (p.extparams) {
+                            var str = Util.Base64Decode(p.extparams);
+                            tmp = JSON.parse(str);
+                        }
+                        tmp.encodeswhere = "r4";
+                        p.extparams = Util.Base64Encode(JSON.stringify(tmp));
+                        p.swhere = Util.Base64Swhere(p.swhere);
+                    }
+
+                    that._ajax(url, p, "post", false, function (data) {
+                        var getData = JSON.parse(data);
+                        if (callback) {
+                            callback(getData);
+                        }
+                    });
+                },
+                // 向导列表的模板
+                wizardListTemp: function (data) {
+                    var item, html = '';
+                    for (var i = 0; i < data.length; i++) {
+                        item = data[i];
+                        html += '<li data-id="' + item.Id +
+                            '" class="mui-table-view-cell mui-indexed-list-item mui-radio mui-left">' +
+                            '<input type="radio" name="wizard"/>' +
+                            '<span class="wizard-list-font">' + item.Name + '</span>' +
+                            '<span class="wizard-list-font">  ' + item.Code + '</span>' +
+                            '</li>';
+                    }
+
+                    $("#wizard_lists_iframe").html(html);
+                },
+                // 获取向导的数据
+                getWizardList: function (searchKey, callback) {
+                    var that = this;
+                    var where = "";
+
+                    var obj = {
+                        url: "/Form/GridPageLoad",
+                        select: "",
+                        KeyWord: "Organize", //此处修改KeyWord
+                        KeyWordType: "BO", //此处修改KeyWordType
+                        size: "0",
+                        index: "0",
+                        order: "",
+                        swhere: " 1=1 "
+                    };
+
+                    if (wizardCurrentKeyMap.config && wizardCurrentKeyMap.config.filter) {
+                        where = wizardCurrentKeyMap.config.filter;
+                        obj.swhere += " and " + where;
+                    }
+
+                    if (searchKey && searchKey != "") {
+                        obj.swhere += " and Name like '%" + searchKey + "%'";
+                    }
+
+                    that.gridPageLoad(obj, function (data) {
+                        var getData = [];
+                        if (data.data.value) {
+                            getData = JSON.parse(data.data.value);
+                        }
+                        if (callback) {
+                            callback(getData);
+                        }
+                    });
+                },
+                organizeWizardConfig: function (wizard_origin, wizard_origin_key) {
+                    wizardCurrentKeyMap.config = wizard_origin;
+                    wizardCurrentKeyMap.ComponentID = wizard_origin.ComponentID;
+                    wizardCurrentKeyMap.btnid = wizard_origin_key;
+                    wizardCurrentKeyMap.formid = window.parent.FormId;
+                },
+                closeWizardIframe: function (data, wizard_origin_key, wizard_origin) {
+                    window.parent.closeWizardIframe(data, wizard_origin_key, wizard_origin);
+                },
+                // 获取选择的向导数据
+                getSelectWizard: function(id, callback) {
+                    var selectData, item;
+                    var data = wizardCurrentKeyMap.data;
+
+                    if (!id) {
+                        return false;
+                    }
+                    for(var i = 0; i < data.length; i++) {
+                        item = data[i];
+                        if (item.Id == id) {
+                            selectData = item;
+                            break;
+                        }
+                    }
+
+                    if (callback && selectData) {
+                        callback(selectData);
+                    }
+                },
+                UIInit: function () {
+                    var that = this;
+                    //向导搜索
+                    $("#search_wizard").on("change", function() {
+                        var $this = $(this);
+                        var searchKey = $.trim( $this.val() );
+                        that.getWizardList(searchKey, function (data) {
+                            wizardCurrentKeyMap.data = data;
+                            that.wizardListTemp(data);
+                        });
+                    });
+
+                    // 关闭向导
+                    $("#close_wizard").on("tap", function() {
+                        window.parent.closeWizardIframeContent();
+                    });
+
+                    // 向导数据选取完成 向父页面传递数据
+                    $("#complete_wizard").on("tap", function () {
+                        var selectData,
+                        id = $("#wizard_lists_iframe input:checked")
+                            .closest(".mui-table-view-cell").attr("data-id");
+                        
+                        if (wizardCurrentKeyMap.config.multi == "0") {
+                            that.getSelectWizard(id, function (data) {
+                                selectData = data;
+                            });
+                        } else if (wizardCurrentKeyMap.multi == "1") {
+                            selectData = [];
+                            $("#wizard_lists_iframe input:checked")
+                            .closest(".mui-table-view-cell").each(function() {
+                                id = $(this).attr("data-id");
+                                that.getSelectWizard(id, function (data) {
+                                    selectData.push(data);
+                                }); 
+                            });
+                        }
+
+                        that.closeWizardIframe(selectData, wizard_origin_key, wizard_origin);   
+                    });
+                },
+                init: function () {
+                    this.event();
+                    this.UIInit();
+                },
+                event: function (callback) {
+                    mui.init({
+                        pullRefresh: {
+                            container: '#pullrefresh',
+                            down: {
+                                callback: function () {
+                                    that.event(function () {
+                                        mui('#pullrefresh').pullRefresh().endPulldownToRefresh();
+                                    });
+                                }
+                            },
+                            up: {
+                                contentrefresh: '',
+                                callback: function () {
+                                    mui('#pullrefresh').pullRefresh().endPullupToRefresh();
+                                }
+                            }
+                        }
+                    });
+
+                    var that = this;
+                    var KeyWord = that._getLocaArg("KeyWord");
+                    var Name = that._getLocaArg("Name");
+                    var wizard_origin_key = KeyWord + "." + Name;
+                    var wizard_origin = window.parent.formconfig[wizard_origin_key];
+
+                    if (!wizard_origin) {
+                        //通过xx找不到配置文件
+                        mui.alert(app_global_ResouceId["g_through"] + wizard_origin_key +
+                            app_global_ResouceId["not_fined_config"]);
+                        return false;
+                    }
+
+                    // 获取配置信息
+                    that.organizeWizardConfig(wizard_origin, wizard_origin_key);
+
+                    $("#wizard_title").html(wizard_origin.ComponentName);
+                    
+                    // 获取向导数据
+                    that.getWizardList(null, function (data) {
+                        wizardCurrentKeyMap.data = data;
+                        that.wizardListTemp(data);
+
+                        if (callback) {
+                            callback();
+                        }
+                    });
+                }
+            };
+
+            load_wizard.init();
+        });
+    })(mui, jQuery);
+</script>
+
+</html>

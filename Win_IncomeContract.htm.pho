@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="no" />
+    <title></title>
+    <link href="/Apps/js/mui/css/mui.min.css?v=$AppVersion" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=$AppVersion" rel="stylesheet" type="text/css" />
+    <link href="/Apps/style/newForm.css?v=$AppVersion" rel="stylesheet" type="text/css" />
+    <script src="/Form/Init/$Model.data.FormId/$Model.data.FormState/$Model.data.KeyValue"></script>
+    <script type="text/javascript" hasvelocity="true">
+        var OpenFormId = "$Model.data.OpenFormId";
+        var FormId = "$Model.data.FormId";
+        var FormState = "$Model.data.FormState";
+        var KeyValue = "$Model.data.KeyValue";
+        var SingleParams = "";
+        var strEpsProjId = "$!CurrentSession.EpsProjId";
+    </script>
+    <style>
+        html,body{
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="mui-content win-content">
+        <div class="mui-indexed-list-warp">
+            <div class="sticky-block"> 
+                <div class="mui-input-row mui-search search-win-form">
+                    <input id="win_form_search" type="search" class="mui-input mui-indexed-list-search-input" placeholder="">
+                </div>
+            </div>
+            <div class="mui-indexed-list win-form-lists-warp">
+                <div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+                    <div class="mui-scroll">
+                        <ul id="PS_IncomeContract" class="mui-table-view win-form-lists"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mui-bar mui-bar-footer">
+            <div class="action-table">
+                <div id="win_add_from" class="table-list-action win-add-form">
+                    <span>新增</span>
+                </div>
+                <div id="win_show_action_block" class="table-list-action win-show-action-block">
+                    <span>删除</span>
+                </div>
+            </div>
+            <div class="action-table hide">
+                <div id="win_delete_form" class="table-list-action win-delete-form font-color-red">
+                    <span>确定删除</span>
+                </div>
+                <div id="win_hide_action_block" class="table-list-action win-hide-action-block font-color-sky">
+                    <span>返回</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="/Apps/js/jquery-1.8.3.min.js?v=$AppVersion" type="text/javascript"></script>
+<script src="/Apps/js/mui/js/mui.min.js?v=$AppVersion" type="text/javascript"></script>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=$AppVersion" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=$AppVersion"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=$AppVersion"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=$AppVersion"></script>
+<script src="/Apps/newAppjs/Win_AppForm.js?v=$AppVersion" type="text/javascript"></script>
+<script type="text/javascript">
+    (function (mui, $) {
+        var win_appForm = new Win_AppForm();
+        
+        win_appForm.init({
+            // 根据字段要搜索相关数据
+            // searchField 的value指的是匹配的字段 目前只支持一个字段
+            searchField: "ContractName",
+            // 获取窗体中的表单列表的参数 
+            dataParams: {
+                // KeyWord 关键字，必须填写， 否则js会不执行
+                KeyWord: "PS_IncomeContract",
+                // select 需要查询哪些字段,默认空
+                select: "",
+                // KeyWordType BO/ViewEntity;默认BO
+                KeyWordType: "BO",
+                // where条件 根据项目上的需要自定义
+                swhere: "EpsProjId='" + strEpsProjId + "'",
+                // size //每页条数，默认0
+                size: "0",
+                // index 当前多少页，默认0
+                index: "0",
+                //排序，默认空
+                order: ""
+            },
+            htmlParams: {
+                //ul的id 必须要和dataParams里面的KeyWord保持一致
+                gridid: "PS_IncomeContract", 
+                //如果需要打开表单，表单的formid :必须有
+                formid: OpenFormId,
+                //主键字段是什么 一般都是Id
+                idfield: "Id",
+                // 字段名在value中设置，如果是一般类型，format设置为 ""
+                // 是下拉框的话 format 设置为 "combobox"
+                // 是日期的话 format 设置为 "yyyy-MM-dd" 或者
+                // "yyyy-MM-dd HH:mm:ss"
+                // 或者 "yyyy-MM-dd-HH-mm-ss"
+                // 或者 "yyyy-MM-ddTHH:mm:ss"
+
+                // 显示的字段 title显示哪个字段
+                title: { value: "ContractName", format: "" },
+                // 显示的字段 left显示哪个字段
+                left: { value: "ContractCode", format: "" },
+                // 显示的字段 center显示哪个字段
+                center: { value: "Status", format: "combobox" },
+                // 显示的字段 right 显示哪个字段
+                right: { value: "RegDate", format: "yyyy-MM-dd" },
+                // 显示的字段 tag 显示哪个字段 默认是Status 尽量不要修改
+                tag: { value: "Status", format: "combobox" },
+            }
+        }, function(that, optionDiv, formConfig, config, hasRight) {
+            // 留给项目上人员的自定义部分
+            // that 指的是 win_appForm 对象的原型对象，必要的时候可以通过that使用原型中封装的方法 具体的可以参考Win_AppForm.js里面的方法
+            // optionDiv 是当前项目实施人员的页面配置项  主要包含 searchField， dataParams， htmlParams
+            // formConfig 就是 页面后台的配置配置 主要是 formconfig
+            // config 是 formconfig.config.joindata 里面的数据
+            // hasRight 是从keywordright[config["KeyWord"]]拿取的权限
+
+            // js库引用的jQuery http://www.runoob.com/jquery/jquery-tutorial.html
+            // 组件库赢得是mui.js http://dev.dcloud.net.cn/mui/ui/
+            // 下面可以写用户自定义的代码
+            // console.log(that);            
+        });
+    })(mui, jQuery);
+</script>
+</html>

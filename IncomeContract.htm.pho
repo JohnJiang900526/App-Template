@@ -1,0 +1,396 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="no" />
+    <title></title>
+
+    <link href="/Apps/js/mui/css/mui.min.css?v=$AppVersion" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=$AppVersion" rel="stylesheet" type="text/css" />
+    <link href="/Apps/style/newForm.css?v=$AppVersion" rel="stylesheet" type="text/css" />
+    <script src="/Form/Init/$Model.data.FormId/$Model.data.FormState/$Model.data.KeyValue"></script>
+
+    <script type="text/javascript" hasvelocity="true">
+        var KeyValue = "$Model.data.KeyValue";
+        var FormId = "$Model.data.FormId";
+        var FormState = "$Model.data.FormState";
+        var strEpsProjId = "$!CurrentSession.EpsProjId";
+        var KeyWord = "$Model.data.KeyWord";
+    </script>
+</head>
+
+<body>
+    <header class="mui-bar mui-bar-nav">
+        <div class="mui-slider mui-fullscreen">
+            <div id="sliderSegmentedControl" class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+                <div class="mui-scroll heade-nav">
+                    <a class="mui-control-item mui-active" href="#item1">
+                        <span>基本信息</span>
+                    </a>
+                    <a class="mui-control-item" href="#item2">
+                        <span>收款节点</span>
+                    </a>
+                    <a id="attach_action" class="mui-control-item" href="#AttachMainContent">
+                        <span>附件</span>
+                        <span id="attach_num"></span>
+                    </a>
+                    <a id="report_action" class="mui-control-item" href="#ReportContent">
+                        <span>报表</span>
+                    </a>
+                    <a id="comment_action" class="mui-control-item" href="#CommentContent">
+                        <span>评论</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="mui-content">
+        <div id="item1" class="mui-control-content mui-active">
+            <form id="PS_IncomeContract" class="mui-input-group main-table">
+                <div class="mui-input-row">
+                    <label class="mui-label-text">合同编号</label>
+                    <input id="PS_IncomeContract_ContractCode" type="text" name="ContractCode" readonly class="mui-input" placeholder="">
+                </div>
+                <div class="mui-input-row">
+                    <label class="mui-label-text">合同状态</label>
+                    <input id="PS_IncomeContract_Status" type="text" name="Status" data-keyword="PS_IncomeContract"
+                     class="mui-input mui-select" placeholder="">
+                </div>
+                <div class="mui-input-row">
+                    <label class="mui-label-text">合同名称</label>
+                    <input id="PS_IncomeContract_ContractName" type="text" name="ContractName" class="mui-input" placeholder="">
+                </div>
+                <div class="mui-input-row">
+                    <label class="mui-label-text">合同甲方</label>
+                    <input type="text"  
+                        id="PS_IncomeContract_PartyA"
+                        data-url="/PowerPlat/FormXml/zh-CN/StdContract/IncomeContract.wizard.PartyA.html" 
+                        name="PartyA" 
+                        data-keyword="PS_IncomeContract"
+                        class="mui-input mui-wizard" 
+                    placeholder="">
+                </div>
+                <div class="mui-input-row">
+                    <label class="mui-label-text">合同金额</label>
+                    <input 
+                        id="PS_IncomeContract_ContractAmount" 
+                        type="number" 
+                        name="ContractAmount" 
+                        class="mui-input" 
+                    placeholder="">
+                </div>
+                <div class="mui-input-row">
+                    <label class="mui-label-text">录入日期</label>
+                    <input id='PS_IncomeContract_RegDate' name="RegDate" type="text" class="btn-picker mui-input" value="" placeholder="选择日期 ...">
+                </div>
+            </form>
+
+            <nav class="mui-bar mui-bar-footer">
+                <div id="Action_btn" class="mui-slider mui-fullscreen mui-bar-actions">
+                    <a class="mui-control-item permission-btn font-color-active">
+                        <span class="mui-icon mui-icon-bars"></span>
+                        <span>操作</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div id="item2" class="mui-control-content">
+            <ul id="PS_IncomeContract_PayNodes" class="mui-table-view children-table-lists"></ul>
+            <div class="form-wrap">
+                <form id="PS_IncomeContract_PayNodes_Form" class="form children-table-form mui-input-group move-animation-start">
+                    <div class="input-group">
+                        <div class="mui-input-row">
+                            <label class="mui-label-text">节点名称</label>
+                            <input id="PS_IncomeContract_PayNodes_PayNodes" required name="PayNodes" type="text" class="mui-input" placeholder="">
+                        </div>
+                        <div class="mui-input-row">
+                            <label class="mui-label-text">收款类型</label>
+                            <input id="PS_IncomeContract_PayNodes_PayType" required name="PayType" type="text" data-keyword="PS_IncomeContract_PayNodes"
+                                class="mui-input mui-select" placeholder="">
+                        </div>
+                        <div class="mui-input-row">
+                            <label class="mui-label-text">收款金额</label>
+                            <input id="PS_IncomeContract_PayNodes_PayAmount" required name="PayAmount" type="number" class="mui-input" placeholder="">
+                        </div>
+                        <div class="mui-input-row">
+                            <label class="mui-label-text">节点描述</label>
+                            <input id="PS_IncomeContract_PayNodes_PayDescription" name="PayDescription" type="text" class="mui-input" placeholder="">
+                        </div>
+                        <div class="mui-input-row">
+                            <label class="mui-label-text">节点备注</label>
+                            <input id="PS_IncomeContract_PayNodes_Remarks" name="Remarks" type="text" class="mui-input" placeholder="">
+                        </div>
+                        <div class="mui-input-row">
+                            <label class="mui-label-text">提交时间</label>
+                            <input id="PS_IncomeContract_PayNodes_UpdDate" name="UpdDate" type="text" class="btn-picker mui-input" placeholder="">
+                        </div>
+                    </div>
+                    <nav class="mui-bar mui-bar-footer">
+                        <div class="action-table">
+                            <div class="table-list-action save-child-table font-color-active">
+                                <span class="mui-icon mui-icon-paperplane"></span>
+                                <span>保存</span>
+                            </div>
+                            <div class="table-list-action close-child-table font-color-red">
+                                <span class="mui-icon mui-icon-closeempty"></span>
+                                <span>关闭</span>
+                            </div>
+                        </div>
+                    </nav>
+                </form>
+            </div>
+            <nav class="mui-bar mui-bar-footer">
+                <div class="action-table">
+                    <div class="table-list-action add-table-list font-color-active">
+                        <span class="mui-icon mui-icon-plusempty"></span>
+                        <span>新增</span>
+                    </div>
+                    <div class="table-list-action delete-table-list font-color-red">
+                        <span class="mui-icon mui-icon-trash"></span>
+                        <span>删除</span>
+                    </div>
+                </div>
+                <div class="action-table hide">
+                    <div class="table-list-action delete-table-lists font-color-red">
+                        <span class="mui-icon mui-icon-trash"></span>
+                        <span>确认删除</span>
+                    </div>
+                    <div class="table-list-action delete-table-back font-color-active">
+                        <span class="mui-icon mui-icon-undo"></span>
+                        <span>返回</span>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <!-- 附件的dom容器 不可删 -->
+        <div id="AttachMainContent" class="mui-control-content">
+            <div id="fileAttach">
+                <div class="file-attach-list">
+                    <div class="title file-attach-title hide">图片</div>
+                    <ul id="picFiles" class="mui-table-view"></ul>
+                </div>
+                <div class="file-attach-list">
+                    <div class="title file-attach-title hide">视频/音频</div>
+                    <ul id="mediaFiles" class="mui-table-view"></ul>
+                </div>
+
+                <div class="file-attach-list">
+                    <div class="title file-attach-title hide">文档</div>
+                    <ul id="docFiles" class="mui-table-view"></ul>
+                </div>
+
+                <div class="file-attach-list">
+                    <div class="title file-attach-title hide">其他</div>
+                    <ul id="otherFiles" class="mui-table-view"></ul>
+                </div>
+            </div>
+            <nav class="mui-bar mui-bar-footer">
+                <div class="mui-slider mui-fullscreen mui-bar-actions">
+                    <div class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+                        <div class="mui-scroll">
+                            <a id="Gallery" class="mui-control-item permission-btn">
+                                <span class="mui-icon mui-icon-image"></span>
+                                <span>上传图片</span>
+                            </a>
+                            <a id="Camera" class="mui-control-item permission-btn">
+                                <span class="mui-icon mui-icon-camera"></span>
+                                <span>打开相机</span>
+                            </a>
+                            <a id="RecordVideos" class="mui-control-item permission-btn">
+                                <span class="mui-icon mui-icon-videocam"></span>
+                                <span>打开录像</span>
+                            </a>
+                            <a id="Videos" class="mui-control-item permission-btn">
+                                <span class="mui-icon mui-icon-videocam"></span>
+                                <span>上传视频</span>
+                            </a>
+                            <a id="Audio" class="mui-control-item permission-btn hide">
+                                <span class="mui-icon mui-icon-mic"></span>
+                                <span>打开录音</span>
+                            </a>
+                            <a id="UploadFileAll" class="mui-control-item permission-btn">
+                                <span class="mui-icon mui-icon-upload"></span>
+                                <span>上传文件</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <!-- 报表的容器 -->
+        <div id="ReportContent" class="mui-control-content">
+            <ul id="ReportLists" class="mui-table-view"></ul>
+        </div>
+        <!-- 评论容器 -->
+        <div id="CommentContent" class="mui-control-content comment-content-main-wrap ">
+            <div class="comment-content-main">
+                <div id="comment_lists_wrap" class="comment-lists-wrap">
+                    <div id="comment_history"></div>
+                </div>
+                <div class="comment-action-wrap">
+                    <div class="comment-actions">
+                        <div class="subscribe-warp hide">
+                            <span class="mui-checkbox">
+                                <input id="subscribe" name="checkbox" value="" type="checkbox">
+                            </span>
+                            <span class="text">订阅</span>
+                        </div>
+                        <div class="people-at-wrap">
+                            <div id="at_wizard" data-option='{"title":"选择需要@的人员","searchName":"搜索需要@的人员","target":"atPeople"}' class="at-icon">
+                                <span class="at-icon-text">@</span>
+                            </div>
+                            <div class="at-people-text-wrap">
+                                <input class="people-lists" type="text" disabled>
+                                <div id="selected_lists" class="selected-lists"></div>
+                            </div>
+                        </div>
+                        <div id="send_btn" class="comment-send">
+                            <span class="send-btn">发送</span>
+                        </div>
+                    </div>
+                    <div class="comment-text-area-wrap">
+                        <textarea id="Send_comment_text" class="comment-text-area" placeholder="输入评论内容"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 监控流程DOM容器 -->
+    <div class="monitor-content move-animation-start">
+        <div class="monitor-content-mask"></div>
+        <div class="monitor-content-main">
+            <div class="close-monitor-content">
+                <span class="mui-icon mui-icon-closeempty"></span>
+            </div>
+            <div class="lists-monitor-content" style="overflow: hidden;">
+                <div class="lists-monitor-content">
+                    <ul id="lists_monitor" class="mui-table-view lists_monitor"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- At人员向导的DOM容器 不可删 不许修改-->
+    <div class="mui-content mui-wizard-content at-wizard move-animation-start">
+        <header class="mui-bar mui-bar-nav">
+            <a id="close_wizard" class="mui-btn mui-btn-link mui-pull-left mui-btn-blue">关闭</a>
+            <h1 id="wizard_title" class="mui-title">选择</h1>
+            <a id="complete_wizard" class="mui-btn mui-btn-link mui-pull-right mui-btn-blue">完成</a>
+        </header>
+        <div class="mui-indexed-list">
+            <div class="mui-indexed-list-search mui-input-row mui-search">
+                <input id="search_wizard" type="search" class="mui-input-clear mui-indexed-list-search-input" placeholder="搜索">
+            </div>
+            <div class="mui-indexed-list-inner">
+                <ul id="wizard_lists" class="mui-table-view">
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- 主子表向导容器 -->
+    <div class="mui-content mui-wizard-content wizard-iframe move-animation-start">
+        <iframe name="WizardIframe" id="WizardContentIframe" src="" frameborder="0"></iframe>
+    </div>
+
+    <!-- 操作表的DOM容器 不可删 不许修改-->
+    <div id="ActionSheet" class="mui-popover mui-popover-action mui-popover-bottom">
+        <ul id="ActionSheetList" class="mui-table-view">
+        </ul>
+        <ul class="mui-table-view">
+            <li class="mui-table-view-cell">
+                <a href="#ActionSheet">
+                    <b>取消</b>
+                </a>
+            </li>
+        </ul>
+    </div>
+</body>
+
+<script src="/Apps/js/jquery-1.8.3.min.js?v=$AppVersion" type="text/javascript"></script>
+<script src="/Apps/js/mui/js/mui.min.js?v=$AppVersion" type="text/javascript"></script>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=$AppVersion" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=$AppVersion"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=$AppVersion"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=$AppVersion"></script>
+<script src="/Apps/newAppjs/AppForm.js?v=$AppVersion" type="text/javascript"></script>
+<script type="text/javascript">
+    (function (mui, $) {
+        var appForm = new AppForm();
+        appForm.init({
+            // 自定义主表模块的按钮 需要添加，不需要去掉
+            // id text type callback都是必须的
+            // id自定义(必须英文,别玩洋的，id中不允许有 . , 使用驼峰或者下划线 ) text按钮名称 type="extend"写死 
+            // callback 必须添加 点击按钮触发的回调函数
+            btnExtend: [{
+                id: "btn1",
+                text: "自定义测试按钮1",
+                type: "extend",
+                callback: function (e) {
+                    mui.alert("btn1");
+                }
+            }, {
+                id: "btn2",
+                text: "自定义测试按钮2",
+                type: "extend",
+                callback: function (e) {
+                    mui.alert("btn2");
+                }
+            }],
+            // 子表配置
+            // 最好不超过两个子表
+            childrenTables: {
+                PS_IncomeContract_PayNodes: {
+                    dataparams: {
+                        KeyWord: "PS_IncomeContract_PayNodes", //子表的KeyWord
+                        select: "", // //需要查询哪些字段,默认空
+                        KeyWordType: "BO", //BO/ViewEntity;默认BO
+                        swhere: "", //where条件，默认空
+                        size: "0", //每页条数，默认0
+                        index: "0", //当前多少页，默认0
+                        order: "" //排序，默认空
+                    },
+                    htmlparams: {
+                        // 指定容器的id，把对应的html塞进指定的元素中
+                        // 一般和子表的KeyWord相同
+                        gridid: "PS_IncomeContract_PayNodes",
+                        idfield: "Id", //主键,
+                        icon: "", //默认fa-plus-square-o
+                        formid: "", //如果需要打开表单，表单的formid
+                        title: {
+                            value: "PayNodes", // title显示的字段
+                            format: ""
+                        },
+                        left: {
+                            value: "PayType", // 左侧显示的字段
+                            format: "combobox" // 如果是下拉框，就设置combobox
+                        },
+                        center: {
+                            value: "PayAmount", // 中间显示的字段
+                            format: ""
+                        },
+                        right: {
+                            value: "PayDescription", // 右边显示的字段
+                            format: ""
+                        }
+                    }
+                }
+            }
+        }, function (formConfig, config, optionDiy, configsMap) {
+            // formConfig 就是 配置信息中的formconfig 
+            // config 是主表信息中的config
+            // optionDiv 是实施人员配置的option信息
+            // configsMap 当前配置的所有表的数据信息
+            // 根据上面的参数，在下面可以自定义方法 以拓展封装方法
+
+
+        });
+    })(mui, jQuery);
+</script>
+
+</html>
