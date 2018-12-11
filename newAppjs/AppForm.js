@@ -659,6 +659,18 @@ function AppForm() {
                     obj[key] = that._formatDate(obj[key], formatTime);
                 }
 
+                // 数字类型
+                var dataType = mainDom.attr("type");
+                if (dataType == "number") {
+                    var numberToFixed = mainDom.attr('data-fix');
+                    if (numberToFixed) {
+                        var ToFixed = new Number(numberToFixed);
+                        value = new Number(value).toFixed(ToFixed);
+                    } else {
+                        value = new Number(value).toFixed(2)
+                    }
+                }
+
                 form.find("#" + KeyWord + "_" + key).val(obj[key]);
             }
         },
