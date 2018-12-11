@@ -665,9 +665,9 @@ function AppForm() {
                     var numberToFixed = mainDom.attr('data-fix');
                     if (numberToFixed) {
                         var ToFixed = new Number(numberToFixed);
-                        value = new Number(value).toFixed(ToFixed);
+                        obj[key] = new Number(obj[key]).toFixed(ToFixed);
                     } else {
-                        value = new Number(value).toFixed(2)
+                        obj[key] = new Number(obj[key]).toFixed(2)
                     }
                 }
 
