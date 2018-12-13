@@ -2566,6 +2566,15 @@ function AppForm() {
                 }
             });
 
+            // 税率
+            $("input.mui-rate").on('change', function() {
+                var $this = $(this);
+                var value = $this.val();
+
+                var val = (Number(value) / 100).toFixed();
+                $this.attr("data-value", val);
+            });
+
             //打开日期选择器
             $(".btn-picker").on("tap", function () {
                 var $this = $(this);
