@@ -1192,12 +1192,12 @@ function AppForm() {
 
             form.find("input,textarea").each(function () {
                 var $this = $(this);
-                var name = $this.attr("name");
+                var key = $this.attr("name");
                 var value = $this.val();
                 var required = $this.prop("required");
                 var text = $this.prev().text();
 
-                data[name] = Util.formatSelectToSave($this, keyword, name, value);
+                data[key] = Util.fieldToSave($this, keyword, key, value);
                 $this.parent().removeClass("mui-required");
                 $this.val("");
             });
