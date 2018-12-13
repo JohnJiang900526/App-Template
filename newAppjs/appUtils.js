@@ -319,5 +319,129 @@ var Util = {
         } else {
             return result;
         }
+    },
+    // select封装 for显示
+    formatSelectToView: function (keyword, key, id) {
+        var result = id;
+        var data = [];
+        var thisSelect = {}
+
+        // 如果在comboboxdata中没有找到 直接返回值
+        if (!comboboxdata[keyword + "." + key]) {
+            return result;
+        }
+        thisSelect = $.extend({}, comboboxdata[keyword + "." + key])
+        data = thisSelect.Data;
+        if (data && data.length != 0) {
+            data = thisSelect.Data;
+        } else {
+            mui.alert("comboboxdata[" + keyword + "." + key + "]为空");
+            return false;
+        }
+
+        var TextField = thisSelect.TextField;
+        var ValueField = thisSelect.ValueField;
+
+        for (var i = 0; i < data.length; i++) {
+            var item = data[i];
+            if (id == item[ValueField]) {
+                result = item[TextField];
+                break;
+            }
+        }
+
+        return result;
+    },
+    // select封装 for保存
+    formatSelectToSave: function (keyword, key, text) {
+        var result = text;
+        var data = [];
+        var thisSelect = {};
+
+        // 如果在comboboxdata中没有找到 直接返回值
+        if (!comboboxdata[keyword + "." + key]) {
+            return result;
+        }
+        thisSelect = $.extend({}, comboboxdata[keyword + "." + key])
+        data = thisSelect.Data;
+        if (data && data.length != 0) {
+            data = thisSelect.Data;
+        } else {
+            mui.alert("comboboxdata[" + keyword + "." + key + "]为空");
+            return false;
+        }
+
+        var TextField = thisSelect.TextField;
+        var ValueField = thisSelect.ValueField;
+
+        for (var i = 0; i < data.length; i++) {
+            var item = data[i];
+            if (text == item[TextField]) {
+                result = item[ValueField];
+                break;
+            }
+        }
+
+        return result;
+    },
+    // 主子表数据显示 for显示
+    fieldToView: function (dom, keyword, key, val) {
+        var that = this;
+        var value = val;
+        if (dom.size() > 0) {
+            // 日期类型
+            if (dom.hasClass("btn-picker")) {
+                var formatTime = dom.attr("data-format");
+                dom.attr('data-value', val);
+                value = that._formatDate(value, formatTime);
+            }
+            // 下拉框类型
+            if (dom.hasClass("mui-select")) {
+                value = that.formatSelectToView(keyword, key, value);
+            }
+
+            if (dom.hasClass('mui-rate')) {
+                value = (Number(value) * 100 + '').toFixed(2);
+            }
+
+            // 数字类型
+            var dataType = dom.attr("type");
+            if (dataType == "number") {
+                var numberToFixed = dom.attr('data-fix');
+                if (numberToFixed) {
+                    var ToFixed = new Number(numberToFixed);
+                    value = new Number(value).toFixed(ToFixed);
+                } else {
+                    value = new Number(value).toFixed(2)
+                }
+            }
+        }
+
+        return value;
+    },
+    // 主子表数据显示 for保存
+    fieldToSave: function (dom, keyword, key, val) {
+        var that = this;
+        var value = val;
+        if (dom.size() > 0) {
+            // 下拉框数据转换
+            if (dom.hasClass("mui-select")) {
+                value = that.formatSelectToSave(keyword, key, value);
+            }
+
+            // 税率类型数据转换
+            if (dom.hasClass("mui-rate")) {
+                value = Number(value.replace('%', ''));
+                value = (value / 100) + "";
+                value = value.toFixed(2);
+            }
+
+            // 如果是日期
+            if (dom.hasClass("btn-picker")) {
+                value = dom.attr('data-value');
+            }
+        }
+
+        return value;
     }
 };

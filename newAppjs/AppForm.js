@@ -535,43 +535,6 @@ function AppForm() {
             }
             return result;
         },
-        //获取子表上，行的标题数据
-        getTableTypeResult: function (htmlparams, row, type) {
-            var that = this;
-            var result = "";
-
-            if (htmlparams[type].value != "") {
-                var format = htmlparams[type].format;
-                //普通文本
-                if (!format) {
-                    result = row[htmlparams[type].value];
-                } else if (format == "combobox") {
-                    var comb = comboboxdata[htmlparams.gridid + "." + htmlparams[type].value];
-                    if (comb) {
-                        var ds = comb.Data;
-                        var v = row[htmlparams[type].value];
-                        for (var i = 0; i < ds.length; i++) {
-                            var d = ds[i];
-                            if (d[comb.ValueField] == v) {
-                                result = d[comb.TextField];
-                                break;
-                            }
-                        }
-                    }
-                } else if (format.indexOf("n") > -1 || format.indexOf("c") > -1 || format.indexOf("p") > -1) {
-                    //数字
-                    result = new Number(row[htmlparams[type].value]);
-                } else if (format.indexOf("y") > -1) {
-                    //日期
-                    result = that._formatDate(row[htmlparams[type].value], format);
-                }
-            }
-
-            if (!result) {
-                result = "暂无";
-            }
-            return result.replace("null", "");
-        },
         //form config 中 filter 转换成 where 条件
         filterToSWhere: function (filter) {
             var result = "";
@@ -584,29 +547,6 @@ function AppForm() {
                 }
                 result = result + " and " + fd + "='" + filter[fd] + "'";
             }
-            return result;
-        },
-        // 状态封装
-        formatStatus: function (keyword, key, id) {
-            var result = id;
-            var data = [];
-            if (!comboboxdata[keyword + "." + key]) {
-                return result;
-            } else {
-                if (comboboxdata[keyword + "." + key].Data && comboboxdata[keyword + "." + key].Data.length != 0) {
-                    data = comboboxdata[keyword + "." + key].Data;
-                } else {
-                    mui.alert("comboboxdata{" + keyword + "." + key + "]为空");
-                }
-            }
-
-            for (var i = 0; i < data.length; i++) {
-                if (id == data[i].id) {
-                    result = data[i].text;
-                    break;
-                }
-            }
-
             return result;
         },
         // 获取主表数据
@@ -634,7 +574,6 @@ function AppForm() {
         },
         // 渲染主表数据  显示在页面上
         setMainTable: function (obj, config) {
-            var that = this;
             var obj = $.extend({}, obj);
             var KeyWord = config.KeyWord;
             var form = $("#" + KeyWord);
@@ -646,32 +585,11 @@ function AppForm() {
             }
 
             for (var key in obj) {
-                if (key == "RegDate" || key == "UpdDate") {
-                    obj[key] = that._formatDate(obj[key]);
-                }
-                obj[key] = that.formatStatus(KeyWord, key, obj[key]);
-                var mainDom = form.find("#" + KeyWord + "_" + key);
                 //在主表中input或者textarea元素上的id设置规则是 KeyWord + "_" + key的形式
                 //原来的KeyWord + "." + key形式的，废弃
-
-                if (mainDom.size() > 0 && mainDom.hasClass("btn-picker")) {
-                    var formatTime = mainDom.attr("data-format");
-                    obj[key] = that._formatDate(obj[key], formatTime);
-                }
-
-                // 数字类型
-                var dataType = mainDom.attr("type");
-                if (dataType == "number") {
-                    var numberToFixed = mainDom.attr('data-fix');
-                    if (numberToFixed) {
-                        var ToFixed = new Number(numberToFixed);
-                        obj[key] = new Number(obj[key]).toFixed(ToFixed);
-                    } else {
-                        obj[key] = new Number(obj[key]).toFixed(2)
-                    }
-                }
-
-                form.find("#" + KeyWord + "_" + key).val(obj[key]);
+                var mainDom = form.find("#" + KeyWord + "_" + key);
+                obj[key] = Util.fieldToView(mainDom, KeyWord, key, obj[key])
+                mainDom.val(obj[key]);
             }
         },
         disabledRight: function () {
@@ -1116,29 +1034,12 @@ function AppForm() {
                     that.openChildForm(htmlparams.gridid, id, function (row) {
                         if (row) {
                             for (var key in row) {
-                                var value = that.encodeComboBoxData(htmlparams.gridid, key, row[key]);
                                 var childDom = $("#" + htmlparams.gridid + "_" + key);
+                                var value = Util.fieldToView(childDom, htmlparams.gridid, key, row[key]);
 
                                 if (value !== row[key]) {
                                     if (formConfig.table_state != "added") {
                                         childDom.prop("readonly", true);
-                                    }
-                                }
-                                
-                                // 日期类型
-                                if (childDom.hasClass("btn-picker")) {
-                                    var formatTime = childDom.attr("data-format");
-                                    value = that._formatDate(value, formatTime);
-                                }
-                                // 数字类型
-                                var dataType = childDom.attr("type");
-                                if (dataType == "number") {
-                                    var numberToFixed = childDom.attr('data-fix');
-                                    if (numberToFixed) {
-                                        var ToFixed = new Number(numberToFixed);
-                                        value = new Number(value).toFixed(ToFixed);
-                                    } else {
-                                        value = new Number(value).toFixed(2)
                                     }
                                 }
 
@@ -1296,7 +1197,7 @@ function AppForm() {
                 var required = $this.prop("required");
                 var text = $this.prev().text();
 
-                data[name] = that.decodeComboBoxData(keyword, name, value);
+                data[name] = Util.formatSelectToSave($this, keyword, name, value);
                 $this.parent().removeClass("mui-required");
                 $this.val("");
             });
@@ -1526,7 +1427,7 @@ function AppForm() {
                 var key = $this.attr("name");
                 var value = $this.val();
 
-                value = that.decodeComboBoxData(keyword, key, value);
+                value = Util.fieldToSave($this, keyword, key, value);
                 if (!$this.attr("readonly") || !$this.attr("disabled")) {
                     if (formConfig.config.joindata.currow[key] != value) {
                         formConfig.config.joindata.currow[key] = value;
@@ -2668,13 +2569,16 @@ function AppForm() {
             //打开日期选择器
             $(".btn-picker").on("tap", function () {
                 var $this = $(this);
+                var format = $this.attr("data-format");
                 $("input").blur();
 
                 if ($this.prop("readonly")) {
                     return false;
                 } else {
                     that._openDtPicker({}, function (data) {
-                        $this.val(data.text).blur();
+                        var value = Util._formatDate(data.text, format);
+                        $this.attr("data-value", data.text);
+                        $this.val(value).blur();
                     });
                 }
             });
