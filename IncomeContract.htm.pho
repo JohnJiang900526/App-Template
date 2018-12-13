@@ -353,7 +353,7 @@
                         swhere: "", //where条件，默认空
                         size: "0", //每页条数，默认0
                         index: "0", //当前多少页，默认0
-                        order: "" //排序，默认空
+                        sort: "PayNodes DESC" //排序，默认空
                     },
                     htmlparams: {
                         // 指定容器的id，把对应的html塞进指定的元素中

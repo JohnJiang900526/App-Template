@@ -401,7 +401,7 @@ var Util = {
             }
 
             if (dom.hasClass('mui-rate')) {
-                value = (Number(value) * 100 + '').toFixed(2);
+                value = (Number(value) * 100).toFixed(2);
             }
 
             // 数字类型
@@ -431,8 +431,8 @@ var Util = {
 
             // 税率类型数据转换
             if (dom.hasClass("mui-rate")) {
-                value = Number(value.replace('%', ''));
-                value = (value / 100) + "";
+                value = Number((value + "").replace('%', ''));
+                value = value / 100;
                 value = value.toFixed(2);
             }
 

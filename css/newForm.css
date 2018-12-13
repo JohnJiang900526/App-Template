@@ -326,6 +326,12 @@ input[readonly] {
     z-index: 100;
 }
 
+.children-table-form>.input-group {
+    height: calc(100% - 55px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .children-table-form.mui-input-group:before {
     position: absolute;
     top: 0;
