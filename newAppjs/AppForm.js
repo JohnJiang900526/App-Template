@@ -2931,6 +2931,8 @@ function AppForm() {
                 }
             });
 
+            // 执行关闭页面后 刷新前一个页面页面
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
         }
     }
 }
