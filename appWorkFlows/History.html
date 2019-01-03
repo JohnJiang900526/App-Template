@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>历史</title>
+    <link href="/Apps/js/mui/css/mui.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/reset.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/common.css?v=6" rel="stylesheet" type="text/css" />
+    <script src="/Apps/js/jquery-1.8.3.min.js?v=6" type="text/javascript"></script>
+    <script src="/Apps/js/mui/js/mui.min.js?v=6" type="text/javascript"></script>
+    <style>
+        .history-content {
+          height: 100%;
+          width: 100%;
+          background-color: #ffffff;
+          display: flex;
+          flex-direction: column;
+        }
+        .history-content .history-title {
+          position: relative;
+          flex: 0 0 40px;
+          line-height: 40px;
+          padding: 0 10px;
+          font-size: 14px;
+        }
+
+        .history-content .history-lists-wrap {
+          flex: 1;
+          height: 100%;
+          width: 100%;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          background-color: #EBEBEB;
+          padding: 10px 5px;
+        }
+        .history-list-item {
+          background-color: #ffffff;
+          margin-bottom: 10px;
+          border-radius: 3px;
+        }
+
+        .history-list-item .item-list-msg {
+          padding: 5px;
+          display: flex;
+        }
+
+        .history-list-item .item-list-msg .item-more {
+          flex: 1;
+        }
+
+        .history-list-item .item-list-msg .name,
+        .history-list-item .item-list-msg .text {
+          font-size: 14px;
+        }
+
+        .item-list-msg .text {
+          color: rgba(0, 0, 0, 0.6);
+        }
+    </style>
+</head>
+<body>
+  <div class="history-content">
+    <div class="history-title active-color bottom-line">
+      监控历史:
+    </div>
+    <div id="historyLists" class="history-lists-wrap">
+    </div>
+  </div>
+</body>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=6" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=6"></script>
+<script src="/Apps/appWorkFlows/common/js/common.js?v=6"></script>
+<script type="text/javascript">
+    $(function() {
+      var MESSAGECODE = "Power.WorkFlows.Actions.RecvFlowOperate";
+      var flowCommon = new WorkFlowCommon();
+      var historyObj = {
+        init: function () {
+          this.events();
+          this.UIEvents();
+        },
+        data: {
+          query: {
+            FormId: '',
+            FormState: "",
+            KeyValue: "",
+            KeyWord: "",
+            SequeID: ""
+          },
+          HistoryData: [],
+          workflowdata: {}
+        },
+        // 给data里面赋值
+        setData: function (obj) {
+          this.data = $.extend(this.data, obj);
+        },
+        // 获取data里面值
+        getData: function (name) {
+          return this.data[name];
+        },
+        // 转换状态
+        formatStatus (status) {
+          let result = ''
+
+          switch (status) {
+            case 'Stop':
+              result = '已终止'
+              break
+            case 'Finish':
+              result = '办结'
+              break
+            case 'Scrap':
+              result = '已废弃'
+              break
+            default:
+              result = '流转中'
+              break
+          }
+
+          return result
+        },
+        // 渲染历史记录数据
+        renderHistory: function () {
+          var that = this;
+          var data = that.getData("HistoryData");
+          var html = '';
+
+          data.forEach(function (item) {
+            html += '<div data-info="'+ item.WorkInfoID +'" class="history-list-item">'+
+              '<div class="item-list-msg">'+
+                '<span class="active-color name">标题: </span>'+
+                '<span class="text"> '+ item.Title +'</span>'+
+                '</div>'+
+              '<div class="item-list-msg more-msg">'+
+                '<div class="item-more">'+
+                  '<span class="active-color name">状态: </span>'+
+                  '<span class="text"> '+ that.formatStatus(item.RecordStatus) +'</span>'+
+                  '</div>'+
+                '<div class="item-more">'+
+                  '<span class="active-color name">终止人: </span>'+
+                  '<span class="text"> '+ item.FinishUserName +'</span>'+
+                  '</div>'+
+                '</div>'+
+              '<div class="item-list-msg">'+
+                '<span class="active-color name">创建时间: </span>'+
+                '<span class="text"> '+ Util._formatDate(item.CreateDate, "yyyy-MM-dd HH:mm:ss") +'</span>'+
+                '</div>'+
+              '<div class="item-list-msg">'+
+                '<span class="active-color name">结束时间: </span>'+
+                '<span class="text"> '+ Util._formatDate(item.FinishDate, "yyyy-MM-dd HH:mm:ss") +'</span>'+
+                '</div>'+
+              '</div>';
+          });
+
+          $("#historyLists").html(html);
+        },
+        // 获取流程历史数据
+        getHistoryData: function () {
+          var that = this;
+          var workflowdataText = localStorage.getItem("current_workflowdata");
+
+          if (workflowdataText) {
+            var workflowdata = JSON.parse(workflowdataText);
+            var ShowHistoryMonitor = [];
+
+            if (workflowdata.CanFlowOperate) {
+              var CanFlowOperate = workflowdata.CanFlowOperate
+              if (CanFlowOperate) {
+                var CanFlowList = CanFlowOperate.CanFlowList;
+                if (CanFlowList) {
+                  var ShowHistoryMonitor = CanFlowList.ShowHistoryMonitor;
+                  if (ShowHistoryMonitor) {
+                    var List = ShowHistoryMonitor.List;
+                    ShowHistoryMonitor = List.concat();
+                  }
+                }
+              }
+            }
+            that.setData({
+              workflowdata: workflowdata,
+              HistoryData: ShowHistoryMonitor
+            });
+
+            that.renderHistory();
+          } else {
+            mui.alert("获取数据有误, 请返回表单重新打开历史");
+            return false;
+          }
+        },
+        // UI事件
+        UIEvents: function () {
+          var that = this;
+
+          $("#historyLists").on("tap", ".history-list-item", function () {
+            var $this = $(this);
+            var WorkInfoID = $this.attr("data-info");
+
+            var url =  flowCommon.createUrl ("/Apps/appWorkFlows/monitor.html", {
+              WorkInfoID: WorkInfoID,
+              flowOperate: "ShowMonitor"
+            });
+            appPhysical.OpenWebView(url, "流程监控");
+          });
+        },
+        events: function () {
+          var that = this;
+          that.setData({
+            query: flowCommon.getQuery()
+          });
+
+          that.getHistoryData();
+        }
+      };
+
+      historyObj.init();
+    });
+</script>
+</html>

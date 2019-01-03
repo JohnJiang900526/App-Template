@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>撤回</title>
+    <link href="/Apps/js/mui/css/mui.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/reset.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/common.css?v=6" rel="stylesheet" type="text/css" />
+    <script src="/Apps/js/jquery-1.8.3.min.js?v=6" type="text/javascript"></script>
+    <script src="/Apps/js/mui/js/mui.min.js?v=6" type="text/javascript"></script>
+    <style>
+        .getback-content {
+          height: 100%;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          background-color: #ffffff;
+        }
+        .getback-content .getback-flow-title {
+          flex: 0 0 40px;
+          line-height: 40px;
+          font-size: 14px;
+          padding: 0 10px;
+        }
+
+        .getback-content  .getback-flow-content {
+          flex: 1;
+          padding: 5px;
+          background-color: #EBEBEB;
+        }
+
+        .getback-content  .getback-flow-content textarea {
+          font-size: 14px;
+        }
+
+        .getback-content .getback-action {
+          flex: 0 0 40px;
+          line-height: 40px;
+          display: flex;
+        }
+
+        .getback-content .getback-action .getback-action-item {
+          text-align: center;
+          font-size: 14px;
+          position: relative;
+          flex: 1;
+        }
+
+        .getback-content .getback-action .getback-action-item::after{
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          right: 0;
+          width: 1px;
+          content: '';
+          -webkit-transform: scaleX(.5);
+          transform: scaleX(.5);
+          background-color: #c8c7cc;
+        }
+
+        .getback-content .getback-action .getback-action-item:last-child::after{
+          width: 0;
+        }
+    </style>
+</head>
+<body>
+  <div class="getback-content">
+    <div class="getback-flow-title active-color bottom-line"  style="color: red;">
+        撤回提示：
+    </div>
+    <div class="getback-flow-content">
+      <div class="mui-card" style="margin: 0px;">
+				<div class="mui-card-content">
+					<div class="mui-card-content-inner" style="line-height: 18px; color: red;">
+						撤销此条信息之后，被发送人将看不到此条数据，你确认撤销？
+					</div>
+				</div>
+			</div>
+    </div>
+    <div class="getback-action">
+      <div data-target="back" class="getback-action-item">返回</div>
+      <div data-target="submit" class="getback-action-item">撤销</div>
+    </div>
+  </div>
+</body>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=6" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=6"></script>
+<script src="/Apps/appWorkFlows/common/js/common.js?v=6"></script>
+<script type="text/javascript">
+    $(function() {
+      var MESSAGECODE = "Power.WorkFlows.Actions.RecvFlowOperate";
+      var flowCommon = new WorkFlowCommon();
+      var getbackObj = {
+        init: function () {
+          this.events();
+          this.UIEvents();
+        },
+        data: {
+          query: {
+            FormId: "",
+            FormState: "",
+            KeyValue: "",
+            KeyWord: "",
+            SequeID: ""
+          }
+        },
+        // 给data里面赋值
+        setData: function (obj) {
+          this.data = $.extend(this.data, obj);
+        },
+        // 获取data里面值
+        getData: function (name) {
+          return this.data[name];
+        },
+        // 提交终止的意见数据
+        submitGetBack: function () {
+          var that = this;
+          var query = that.getData("query");
+          var obj = {
+            MessageCode: MESSAGECODE,
+            data: {
+              Current: $.extend({
+                FormId: "",
+                FormState: "",
+                KeyValue: "",
+                KeyWord: "",
+                SequeID: ""
+              }, query),
+              FlowOperate: "GetBack"
+            }
+          };
+
+          var params = {
+            json: JSON.stringify(obj)
+          };
+
+          flowCommon.showLoading("提交中...");
+          flowCommon.getAPIMessage(params, function (res) {
+            flowCommon.hideLoading();
+            flowCommon.showToast("撤回成功，正在准备跳转...", function () {
+              that.back();
+            });
+          }, function (err) {
+            flowCommon.hideLoading();
+            mui.alert(err);
+          });
+        },
+        // 返回
+        back:function () {
+          if (window.m3app && window.m3app.AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else if (window.PowerM3AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else {
+            window.history.go("-1");
+          }
+        },
+        // UI事件
+        UIEvents: function () {
+          var that = this;
+
+          $(".getback-action-item").on("tap", function () {
+            var $this =  $(this);
+            var target = $this.attr("data-target");
+
+            switch (target) {
+              case "submit":
+                mui.confirm("确认撤回?", "提示", ["否", "是"], function (e) {
+                  if (e.index == 1) {
+                    that.submitGetBack();
+                  } else {
+                    return false;
+                  }
+                });
+                break;
+              case "back":
+                that.back();
+                break;
+              default: 
+                return false;
+            }
+          });
+        },
+        events: function () {
+          var that = this;
+          var query = flowCommon.getQuery();
+          that.setData({
+            query: $.extend({}, query),
+            Current: {
+              FormId: query.FormId,
+              KeyValue: query.KeyValue,
+              KeyWord: query.KeyWord,
+              SequeID: query.SequeID
+            }
+          });
+        }
+      };
+
+      getbackObj.init();
+    });
+</script>
+</html>

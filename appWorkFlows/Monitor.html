@@ -1,0 +1,280 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>监控</title>
+    <link href="/Apps/js/mui/css/mui.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/reset.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/common.css?v=6" rel="stylesheet" type="text/css" />
+    <script src="/Apps/js/jquery-1.8.3.min.js?v=6" type="text/javascript"></script>
+    <script src="/Apps/js/mui/js/mui.min.js?v=6" type="text/javascript"></script>
+    <style>
+        .monitor-content {
+          height: 100%;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          background-color: #ffffff;
+        }
+
+        .monitor-content .monitor-header {
+          flex: 0 0 60px;
+          height: 60px;
+        }
+
+        .monitor-header .monitor-header-item{
+          padding: 8px 10px;
+          font-size: 14px;
+        }
+
+        .monitor-content .monitor-body {
+          flex: 1;
+          height: 100%;
+          width: 100%;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          padding: 0 10px;
+        }
+
+        .monitor-content .monitor-body .monitor-lists-title {
+          padding: 10px 0;
+          font-size: 14px;
+        }
+
+        .monitor-body .monitor-lists-wrap {
+          width: 100%;
+          padding-top: 10px;
+        }
+        .monitor-lists-wrap .monitor-list-item {
+          width: 100%;
+          padding: 0 5px;
+        }
+
+        .monitor-list-item .item-title {
+          position: relative;
+          display: flex;
+          padding: 7px 0 5px 0;
+        }
+
+        .monitor-list-item .item-title .tag {
+          position: absolute;
+          top: 0;
+          left: -11.5px;
+          width: 23px;
+          height: 23px;
+          border-radius: 50%;
+          background-color: #0AB9F5;
+        }
+
+        .monitor-list-item .item-title .item-title-time {
+          flex: 1;
+          font-size: 14px;
+          padding-left: 15px;
+        }
+
+        .monitor-list-item .item-title .item-title-operate {
+          flex: 0 0 60px;
+          text-align: right;
+          font-size: 14px;
+        }
+
+        .monitor-list-item .item-content {
+          position: relative;
+          padding: 0px 0px 0px 10px;
+        }
+
+        .monitor-list-item .item-content::before {
+          position: absolute;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          width: 1px;
+          content: '';
+          -webkit-transform: scaleX(.5);
+          transform: scaleX(.5);
+          background-color: #c8c7cc;
+        }
+
+        .monitor-list-item .item-content .item-text {
+          padding: 5px;
+          line-height: 18px;
+          font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+  <div class="monitor-content">
+    <div class="monitor-header bottom-line">
+      <p class="monitor-header-item">
+        <span class="title active-color">流程名称:</span>
+        <span id="flowName" class="text"></span>
+      </p>
+      <p class="monitor-header-item">
+        <span class="title active-color">流转状态:</span>
+        <span id="flowStatus" class="text"></span>
+      </p>
+    </div>
+    <div class="monitor-body">
+      <div class="monitor-lists-title bottom-line active-color">
+        流转记录：
+      </div>
+      <div id="monitorLists" class="monitor-lists-wrap"></div>
+    </div>
+  </div>
+</body>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=6" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=6"></script>
+<script src="/Apps/appWorkFlows/common/js/common.js?v=6"></script>
+<script type="text/javascript">
+    $(function() {
+      var MESSAGECODE = "Power.WorkFlows.Actions.RecvFlowOperate";
+      var flowCommon = new WorkFlowCommon();
+      var monitorObj = {
+        init: function () {
+          this.events();
+        },
+        data: {
+          query: {
+            WorkInfoID: '',
+            flowOperate: ''
+          },
+          ResultInfo: {},
+          HistoryMind: []
+        },
+        // 给data里面赋值
+        setData: function (obj) {
+          this.data = $.extend(this.data, obj);
+        },
+        // 获取data里面值
+        getData: function (name) {
+          return this.data[name];
+        },
+        // 节点的状态
+        formatInboxStatus (node) {
+          var EFlowInboxStatus = appFlowsEnums.EFlowInboxStatus;
+          switch (node.InboxStatus) {
+            case EFlowInboxStatus.WaitingSign:
+              return '(等候签收)'
+            case EFlowInboxStatus.Hidden:
+              return '(隐藏等候中)'
+            case EFlowInboxStatus.Normal:
+              return '(正在处理)'
+            case EFlowInboxStatus.WorkEnd:
+              return '(已提交)'
+            default:
+              return ''
+          }
+        },
+        // 节点的发送的指令
+        formatFlowOperate (node) {
+          var EFlowOperate = appFlowsEnums.EFlowOperate;
+          switch (node.FlowOperate) {
+            case EFlowOperate.Active:
+              return '送审'
+            case EFlowOperate.Send:
+              return '发送'
+            case EFlowOperate.GetBack:
+              return '回收'
+            case EFlowOperate.Return:
+              return '驳回'
+            case EFlowOperate.Stop:
+              return '终止'
+            case EFlowOperate.CheckOut:
+              return '等候签收'
+            case EFlowOperate.Delegate:
+              if (!node.IsReturnDelegateRoot) {
+                return '委派'
+              } else {
+                return '委派返回'
+              }
+            default:
+              return ''
+          }
+        },
+        // 渲染数据
+        renderMonitorData: function () {
+          var that = this;
+          var ResultInfo = that.getData("ResultInfo");
+          var HistoryMind = that.getData("HistoryMind");
+          var html = '';
+          HistoryMind.forEach(function (item) {
+            var UserName = item.ToUserName || "暂无";
+            var mind = that.formatInboxStatus(item) + item.BeforeContent;
+            var EFlowOperate = that.formatFlowOperate(item);
+
+            if (item.SequeID <= -2) {
+              UserName = "管理员";
+            }
+
+            if (item.IsHidden) {
+              html += '';
+            } else {
+              html += '<div class="monitor-list-item">'+
+              '<div class="item-title">'+
+              '<div class="tag"></div>'+
+              '<div class="item-title-time">'+ item.MindDate +'</div>'+
+              '<div class="item-title-operate">'+ EFlowOperate +'</div>'+
+              '</div>'+
+              '<div class="item-content">'+
+              '<div class="item-text item-role">处理人: '+ UserName +'</div>'+
+              '<div class="item-text item-mind">意 见: '+ mind +'</div>'+
+              '</div>'+
+              '</div>';
+            }
+          });
+
+          $("#flowName").text(ResultInfo.WorkFlowName);
+          $("#flowStatus").text(ResultInfo.RecordStatusName);
+          $("#monitorLists").html(html);
+        },
+        // 获取流程数据
+        getMonitorData: function () {
+          var that = this;
+          var obj = {
+            MessageCode: MESSAGECODE,
+            data: {
+              SubOperate: "ReadConfig",
+              Current: {
+                WorkInfoID: that.getData("query").WorkInfoID
+              },
+              FlowOperate: that.getData("query").flowOperate
+            }
+          };
+          var params = {
+            json: JSON.stringify(obj)
+          };
+
+          flowCommon.showLoading();
+          flowCommon.getAPIMessage(params, function (res) {
+            flowCommon.hideLoading();
+            that.setData({
+              ResultInfo: $.extend({}, res.ResultInfo),
+              HistoryMind: res.ResultInfo.HistoryMind || []
+            });
+
+            that.renderMonitorData();
+          }, function (err) {
+            flowCommon.hideLoading();
+            mui.alert(err);
+          });
+        },
+        events: function () {
+          var that = this;
+          that.setData({
+            query: flowCommon.getQuery()
+          });
+
+          that.getMonitorData();
+        }
+      };
+
+      monitorObj.init();
+    });
+</script>
+</html>

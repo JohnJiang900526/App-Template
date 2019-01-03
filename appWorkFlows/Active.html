@@ -1,0 +1,1007 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>送审</title>
+    <link href="/Apps/js/mui/css/mui.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/reset.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/common.css?v=6" rel="stylesheet" type="text/css" />
+    <script src="/Apps/js/jquery-1.8.3.min.js?v=6" type="text/javascript"></script>
+    <script src="/Apps/js/mui/js/mui.min.js?v=6" type="text/javascript"></script>
+    <style>
+        .work-flow-main-content {
+            height: 100%;
+            width: 100%;
+            background-color: #ffffff;
+        }
+
+        .work-flow-main-content .work-flows-content {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .work-flows-content .title {
+            flex: 0 0 40px;
+            font-size: 16px;
+            font-weight: 200;
+            line-height: 40px;
+            padding: 0 10px;
+            position: relative;
+        }
+        .work-flows-content .title::after{
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            height: 1px;
+            content: '';
+            -webkit-transform: scaleY(.5);
+            transform: scaleY(.5);
+            background-color: #c8c7cc;
+        }
+        .work-flows-content .lists-wrap {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 20px;
+        }
+        .work-flows-content .work-flow-bottom{
+            flex: 0 0 45px;
+            line-height: 45px;
+            display: flex;
+            position: relative;
+        }
+        .work-flows-content .work-flow-bottom::before{
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 1px;
+            content: '';
+            -webkit-transform: scaleY(.5);
+            transform: scaleY(.5);
+            background-color: #c8c7cc;
+        }
+        .work-flow-bottom .work-flow-action{
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        .work-flow-bottom .work-flow-action::after{
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 1px;
+            content: '';
+            -webkit-transform: scaleX(.5);
+            transform: scaleX(.5);
+            background-color: #c8c7cc;
+        }
+        .work-flow-bottom .work-flow-action:last-child::after{
+            width: 0;
+        }
+
+        .mui-input-group::before{
+            height: 0;
+        }
+        .mui-input-group .mui-input-row label{
+            font-size: 14px;
+        }
+
+        .node-list-wrap .node-list{
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        .node-list .node-title {
+            display: flex;
+            padding: 5px 0;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .node-list .node-title .name {
+            flex: 1;
+            color: #007ACC;
+        }
+
+        .node-list .node-title .status {
+            flex: 0 0 50px;
+            text-align: center;
+            color: #007ACC;
+        }
+
+        .node-list .node-title .status .error {
+            color: red;
+        }
+
+        .node-list .node-list-content .list-wrap{
+            padding: 5px 0 0 0;
+            font-size: 14px;
+            line-height: 20px;
+        }
+
+        .node-list .node-list-content .list-wrap .key {
+            color: #007ACC;
+        }
+
+        .node-list .node-list-content .list-wrap .value {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .lists-wrap .text-node-list-wrap {
+            max-height: 63%;
+            min-height: 25%;
+            width: 100%;
+            padding: 0 0 10px 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .text-node-list-wrap .text-node-list .text-node-list-title {
+            border-left: 3px solid #007ACC;
+        }
+
+        .text-node-list-wrap .user-list-conetnt .user-list-title,
+        .text-area-conetnt .text-area-title {
+            padding: 10px 5px;
+            font-size: 14px;
+            background-color: #F1F1F1;
+        }
+
+        textarea {
+            font-size: 14px;
+        }
+
+        .iframe-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            transition: all 0.3s;
+            transform: translate3d(100%, 0, 0);
+        }
+
+        .iframe-wrap iframe{
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="mainContent" class="work-flow-main-content">
+        <div id="WorkFlow" class="work-flows-content">
+            <h3 class="title active-color">选择流程</h3>
+            <div class="lists-wrap">
+                <div id="listsGroup" class="flow-lists mui-input-group">
+                </div>
+            </div>
+            <div class="work-flow-bottom">
+                <div data-target="NodeList" class="work-flow-action next">下一步</div>
+                <div data-target="LastPage" class="work-flow-action up">返回</div>
+            </div>
+        </div>
+        <div id="NodeList" class="work-flows-content" style="display: none;">
+            <h3 class="title active-color">选择节点</h3>
+            <div class="lists-wrap">
+                <div id="NodelistsGroup" class="flow-lists node-list-wrap"></div>
+            </div>
+            <div class="work-flow-bottom">
+                <div data-target="TextNodeList" class="work-flow-action next">下一步</div>
+                <div data-target="WorkFlow" class="work-flow-action up">上一步</div>
+            </div>
+        </div>
+        <div id="TextNodeList" class="work-flows-content" style="display: none;">
+            <h3 class="title active-color">人员选择</h3>
+            <div class="lists-wrap">
+                <div id="TextNodelistsGroup" class="flow-lists text-node-list-wrap"></div>
+                <div class="text-area-conetnt top-line">
+                    <h3 class="text-area-title">填写意见:</h3>
+                    <div class="mui-input-row" style="padding: 10px 10px 0 10px;">
+                        <textarea id="textarea" rows="4" placeholder="输入意见"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="work-flow-bottom">
+                <div data-target="submit" class="work-flow-action next">提交</div>
+                <div data-target="NodeList" class="work-flow-action up">上一步</div>
+            </div>
+        </div>
+    </div>
+    <div id="iframeWrap" class="iframe-wrap">
+        <iframe
+            id="myIframe"
+            frameborder="0"
+            style="border: 0;outline: none;padding: 0;margin: 0"
+            src="/Apps/appWorkFlows/AppSelectUser.html" >
+        </iframe>
+    </div>
+</body>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=6" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=6"></script>
+<script src="/Apps/appWorkFlows/common/js/common.js?v=6"></script>
+<script type="text/javascript">
+    $(function () {
+        var MESSAGECODE = 'Power.WorkFlows.Actions.RecvFlowOperate';
+        var flowCommon = new WorkFlowCommon();
+        var activeObject = {
+            init: function () {
+                this.events();
+
+                this.UIEvents();
+            },
+            // 用到的数据
+            data: {
+                query: {
+                    FormId: '',
+                    KeyValue: '',
+                    KeyWord: '',
+                    flowOperate: ''
+                },
+                WorkFlowResult: {},
+                selectWorkFlow: [],
+                NodeList: [],
+                errorNodeList: [],
+                NextNodeListResult: {},
+                NextNodeList: [],
+                IsMindMustInput: false
+            },
+            // 给data里面赋值
+            setData: function (obj) {
+                this.data = $.extend(this.data, obj);
+            },
+            // 获取data里面值
+            getData: function (name) {
+                return this.data[name];
+            },
+            // 转化nodelist字段名
+            transformNodeListAction: function (row) {
+                var CanSendUsers = row.CanSendUsers;
+                var SendUserMode = row.SendUserMode;
+
+                if (CanSendUsers) {
+                    switch (SendUserMode) {
+                        case 'ByDraft':
+                            return CanSendUsers.length === 0 ?  '选择人员' : '二次筛选';
+                        case 'ByMainNode':
+                            return CanSendUsers.length === 0 ?  '选择人员(指定节点定义,App无法操作)' : '二次筛选(指定节点定义,App无法操作)';
+                        case 'BySendUser':
+                            return '发送时定义'
+                        default:
+                            return '无需操作';
+                    }
+                } else {
+                    return '无需操作';
+                }
+            },
+            // 绑定事件
+            UIEvents: function () {
+                var that = this;
+                // 全局绑定
+                window.closeSelectUserBlock = function (selectedUsers, params) {
+                    that.closeSelectUserBlock(selectedUsers, params);
+                };
+                // 选择流程绑定事件
+                $("#listsGroup").on('change', 'input[type="radio"]', function() {
+                    var id = this.value;
+                    var WorkFlowList = that.getData("WorkFlowResult").WorkFlowList.concat();
+                    
+                    that.setData({
+                        selectWorkFlow: WorkFlowList.filter(function(item) {
+                            if (item.WorkFlowID == id) {
+                                return item;
+                            }
+                        })
+                    });
+                });
+
+                // 下一步绑定事件
+                $("body").on("tap", ".work-flow-action.next", function () {
+                    var $this = $(this);
+                    var target = $this.attr("data-target");
+                    switch (target) {
+                        case 'NodeList':
+                            that.ToNextStep("NodeList");
+                            break;
+                        case 'submit':
+                            that.submitData();
+                            break;
+                        case 'TextNodeList':
+                            that.ToNextStep("TextNodeList");
+                            break;
+                    }
+                });
+
+                // 上一步绑定事件
+                $("body").on("tap", ".work-flow-action.up", function () {
+                    var $this = $(this);
+                    var target = $this.attr("data-target");
+                    switch (target) {
+                        case 'NodeList':
+                            that.ToUpStep("NodeList");
+                            break;
+                        case 'LastPage':
+                            that.back();
+                            break;
+                        case 'WorkFlow':
+                            that.ToUpStep("WorkFlow");
+                            break;
+                    }
+                });
+
+                // 人员选择相关
+                // 节点选择
+                $("#TextNodelistsGroup").on('tap', '.text-node-list-title', function () {
+                    var $this = $(this);
+                    
+                    that.NextNodeClickEvent($this);
+                });
+
+                //人员点击事件
+                $("#TextNodelistsGroup").on("tap", '.user-lists > .mui-input-row', function () {
+                    var user = $(this);
+                    var input = user.find("input.user-list");
+
+                    that.NextNodeUserClickEvent(input, user);
+                });
+
+                $("#NodelistsGroup").on("tap", ".node-list", function () {
+                    var List = $(this);
+                    var NodeCode = List.attr("data-code");
+                    var row = that.getData("NodeList").filter(function(item) {
+                        if (item.NodeCode == NodeCode) {
+                            return item;
+                        }
+                    })[0];
+
+                    var params = {
+                        type: 'NodeList',
+                        row: row,
+                        class: "CanSendUsers",
+                        users: row.CanSendUsers
+                    };
+                    if (row.SendUserMode == "ByDraft") {
+                        that.openSelectUserBlock(params);
+                    }
+                });
+            },
+            // 人员选择 人员点击事件
+            NextNodeUserClickEvent: function (user, line) {
+                var that = this;
+                var type = user.attr("data-type");
+                var checked = user.prop("checked");
+                var disabled = user.prop("checked");
+                var NodeCode = user.closest(".text-node-list").attr("data-code");
+                var row = that.getData("NextNodeList").filter(function(item) {
+                    if (item.NodeCode == NodeCode) {
+                        return item;
+                    }
+                })[0];
+
+                var AllowMulitUser = row.AllowMulitUser;
+                if (disabled) {
+                    return false;
+                }
+
+                if (!AllowMulitUser) {
+                    line.siblings().find("input.user-list").prop("checked", false);
+                }
+            },
+            // 人员选择 节点的click事件
+            NextNodeClickEvent: function (nodeList) {
+                var that = this;
+                var input = nodeList.find("input.node-title");
+                var textNodeList = nodeList.closest(".text-node-list");
+                var SelectNodeMode = textNodeList.attr('data-selectnodemode');
+                var checked = input.prop("checked");
+                var disabled = input.prop("disabled");
+                var userLists = textNodeList.find("input.user-list");
+
+                if (disabled) { mui.alert('此节点禁止操作'); return false; }
+                switch (SelectNodeMode) {
+                    case 'SelectedNode':
+                        checked = !checked;
+                        that.whenNextNodeClickForUser(checked, userLists)
+                        break;
+                    case 'SelectedAndDisabled':
+                        return false;
+                    default:
+                        checked = !checked;
+                        that.whenNextNodeClickForUser(checked, userLists)
+                }
+            },
+            // 人员选择 操作节点 人员的默认执行事件
+            whenNextNodeClickForUser: function (checked, userLists) {
+                if (!checked) {
+                    userLists.prop("checked", false);
+                } else {
+                    userLists.each(function () {
+                        var userList = $(this);
+                        var SelectUserMode = userList.attr("data-usermode");
+                        var type = userList.attr("data-type");
+
+                        if (type == 'CanSend') {
+                            switch (SelectUserMode) {
+                                case 'DeselectAll':
+                                    userList.prop("checked", false);
+                                    break;
+                                case 'SelectAll':
+                                    userList.prop("checked", true);
+                                    break;
+                                case 'SelectAllAndDisabled':
+                                    userList.prop("checked", true);
+                                    break;
+                                default:
+                                    userList.prop("checked", false);
+                            }
+                        } else {
+                            userList.prop("checked", false);
+                        }
+                    });
+                }
+            },
+            // 控制面板的显示与隐藏
+            controllBlock: function(id) {
+                var targetDom = $("#" + id);
+                targetDom.show();
+                targetDom.siblings().hide();
+            },
+            // 判断NextNodeList的选中权限
+            checkNextNodeListSelect: function (item, data) {
+                var SelectNodeMode = item.SelectNodeMode;
+                switch (SelectNodeMode) {
+                    case 'SelectedNode':
+                        if (item.IsLastReturnNode) {
+                            return {
+                                checked: false,
+                                disabled: false
+                            };
+                        } else {
+                            return {
+                                checked: true,
+                                disabled: false
+                            };
+                        }
+                    case 'SelectedAndDisabled':
+                        return {
+                            checked: true,
+                            disabled: true
+                        };
+                    default:
+                        if (data.length == 1) {
+                            return {
+                                checked: true,
+                                disabled: false
+                            };
+                        } else {
+                            return {
+                                checked: false,
+                                disabled: false
+                            };
+                        }
+                }
+            },
+            // 判断NextNodeList的选中权限
+            checkNextUserSelect: function (row, item, data) {
+                var that = this;
+                var SelectUserMode = row.SelectUserMode;
+                var DefaultUserID = row.DefaultUserID;
+                var NextNodeList = that.getData('NextNodeList');
+
+                if (DefaultUserID == item.UserID) {
+                    return true;
+                }
+                switch (SelectUserMode) {
+                    case 'DeselectAll':
+                        return false;
+                    case 'SelectAll':
+                        return true;
+                    case 'SelectAllAndDisabled':
+                        return true;
+                    default:
+                        if (NextNodeList.length == 1) {
+                            if (data.length == 1) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                }
+            },
+            // 流程渲染
+            renderForFlowLists: function (data, id) {
+                var that = this;
+                var WorkFlowID = this.data.WorkFlowResult.WorkFlowID;
+                var html = '';
+
+                data.forEach(function (item) {
+                    var checked = false;
+                    if (
+                        WorkFlowID == item.WorkFlowID || 
+                        data.length == 1 ||
+                        item.IsAutoSelect
+                    ) {
+                        checked = 'checked';
+                        that.setData({
+                            selectWorkFlow: [item]
+                        })
+                    }
+
+                    html += '<div class="mui-input-row mui-radio mui-right">' +
+                        '<label>'+ item.WorkFlowName +'</label>' +
+                        '<input '+ checked +' value="'+ item.WorkFlowID +'" name="WorkFlowList" type="radio">' +
+                        '</div>';
+                });
+                $("#" + id).html(html);
+            },
+            // 渲染NodeList
+            renderNodeLists: function (data, id) {
+                var that = this;
+                var html = '';
+                data.forEach(function (item) {
+                    var status = item.Status ? 
+                        '<span class="value">正常</span>' : 
+                        '<span class="value error">异常</span>';
+
+                    var UserNames = item.CanSendUsers.map(function (userItem) {
+                        return userItem.UserName
+                    });
+                    var userStr = UserNames.join(', ');
+                    
+                    html += '<div data-code="'+ item.NodeCode +'" class="node-list bottom-line">'+
+                        '<div class="node-title">'+
+                            '<div class="name">'+
+                                '<span class="key">节点名称:</span>'+
+                                '<span class="value">'+ item.NodeName +'</span>'+
+                                '</div>'+
+                            '<div class="status">'+ status +'</div>'+
+                        '</div>'+
+                        '<div class="node-list-content">'+
+                            '<p class="list-wrap">'+
+                                '<span class="key">节点描述:</span>'+
+                                '<span class="value">'+ item.ShowUserInfo +'</span>'+
+                            '</p>'+
+                            '<p class="list-wrap">'+
+                                '<span class="key">可选人员:</span>'+
+                                '<span class="value">'+ userStr +'</span>'+
+                            '</p>'+
+                            '<p class="list-wrap">'+
+                                '<span class="key">操作:</span>'+
+                                '<span class="value">'+ that.transformNodeListAction(item) +'</span>'+
+                            '</p>'+
+                            '</div>'+
+                        '</div>';
+                });
+
+                $("#" + id).html(html);
+            },
+            // 渲染人员列表
+            renderUserList: function (row, type) {
+                var that = this;
+                var html = '';
+                var data = type == 'CanSend' ? row.CanSelectUsers.concat() : row.CanSelectCopyUsers.concat();
+                
+                data.forEach(function(item) {
+                    var checked = that.checkNextUserSelect(row, item, data) ? 'checked' : '';
+                    html += '<div class="mui-input-row mui-checkbox bottom-line">' +
+                        '<label>' + item.UserName + '</label>' +
+                        '<input '+ checked +' value="'+ item.UserID +'" data-usermode="'+ row.SelectUserMode +'" data-type="' + type + '" name="' + item.UserName + '" class="user-list" type="checkbox">' +
+                        '</div>';
+                });
+                return html;
+            },
+            // 渲染NextNodeList
+            renderNextNodeList: function (data, id) {
+                var that = this;
+                var html = '';
+                data.forEach(function(item) {
+                    that.setData({
+                        IsMindMustInput: item.IsMindMustInput
+                    });
+                    var NodeMode = that.checkNextNodeListSelect(item, data);
+                    var checked = NodeMode.checked ? 'checked' : '';
+                    var disabled = NodeMode.disabled ? 'disabled' : '';
+
+                    if (item.IsCancel) {
+                        html += '';
+                    } else {
+                        html += '<div data-selectnodemode="'+ item.SelectNodeMode +'" data-code="'+ item.NodeCode +'" class="text-node-list">' +
+                        '<div class="text-node-list-title mui-input-row mui-checkbox bottom-line">' +
+                        '<label>'+ item.NodeName +'</label>' +
+                        '<input '+ checked +' name="checkbox" '+ disabled +' class="node-title" type="checkbox">' +
+                        '</div>' +
+                        '<div class="user-contents">' +
+                        '<div class="user-list-conetnt">' +
+                        '<h3 class="user-list-title">可送审人员</h3>' +
+                        '<div class="user-lists">'+ that.renderUserList(item, 'CanSend') +'</div>' +
+                        '</div>' +
+                        '<div class="user-list-conetnt">' +
+                        '<h3 class="user-list-title">可抄送人员</h3>' +
+                        '<div class="user-lists">'+ that.renderUserList(item, 'CanCopy') +'</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                    }
+                });
+                $("#" + id).html(html);
+            },
+            // 创建一个Current
+            createCurrent: function (Flow) {
+                var that = this;
+                var query = that.getData("query");
+
+                var Current = {
+                    WorkFlowID: Flow.WorkFlowID,
+                    Version: Flow.Version,
+                    FormId: query.FormId,
+                    KeyWord: query.KeyWord,
+                    KeyValue: query.KeyValue,
+                    WorkInfoID: query.WorkInfoID || Util.newGuid()
+                };
+
+                that.setData({
+                    Current: $.extend({}, Current)
+                });
+            },
+            // 获取流程数据
+            getWorkFlowData: function (callback) {
+                var that = this;
+                var query = this.data.query;
+
+                var obj = {
+                    MessageCode: MESSAGECODE,
+                    data:{
+                        KeyWord:query.KeyWord,
+                        KeyValue:query.KeyValue,
+                        FormId:query.FormID,
+                        FlowOperate:"SelectFlow"
+                    }
+                }
+
+                var params = {
+                    json: JSON.stringify(obj)
+                }
+                flowCommon.showLoading();
+                flowCommon.getAPIMessage(params, function(res) {
+                    flowCommon.hideLoading();
+                    that.setData({
+                        WorkFlowResult: $.extend({}, res)
+                    });
+
+                    that.renderForFlowLists(
+                        that.data.WorkFlowResult.WorkFlowList, 
+                        'listsGroup'
+                    );
+
+                    callback && callback();
+                }, function (err) {
+                    flowCommon.hideLoading();
+                    mui.alert(err);
+                });
+            },
+            // 获取节点数据
+            getNodeList: function () {
+                var that = this;
+                var currentSelectWorkFlow = that.getData("selectWorkFlow")[0];
+                that.createCurrent(currentSelectWorkFlow);
+
+                var Current = that.getData("Current");
+                var obj = {
+                    MessageCode: MESSAGECODE,
+                    data: {
+                        SubOperate: "ReadNodeList",
+                        Current: Current,
+                        FlowOperate: "SupplyFlow"
+                    }
+                };
+                var params = {
+                    json: JSON.stringify(obj)
+                };
+
+                flowCommon.showLoading();
+                flowCommon.getAPIMessage(params, function(res) {
+                    flowCommon.hideLoading();
+                    var lists = res.NodeList.concat();
+                    var errorNodeList = [];
+                    lists.map(function(item) {
+                        if (item.CanSendUsers) {
+                            item.CanSendUsers = JSON.parse(item.CanSendUsers);
+                        }
+
+                        if (!item.Status) {
+                            errorNodeList.push(item);
+                        }
+                    });
+                    that.setData({
+                        NodeList: lists.concat(),
+                        errorNodeList: errorNodeList.concat()
+                    });
+                    that.renderNodeLists(that.getData("NodeList"), 'NodelistsGroup');
+                    if (errorNodeList.length == 0) {
+                        that.ToNextStep('TextNodeList');
+                    }
+                }, function (err) {
+                    flowCommon.hideLoading();
+                    mui.alert(err);
+                });
+            },
+            // 获取节点人员数据
+            getTextNodeList: function () {
+                var that = this;
+                var Current = that.getData("Current");
+                var obj = {
+                    MessageCode: MESSAGECODE,
+                    data: {
+                        Current: Current,
+                        FlowOperate: "Active"
+                    }
+                };
+                var params = {
+                    json: JSON.stringify(obj)
+                };
+
+                flowCommon.showLoading();
+                flowCommon.getAPIMessage(params, function(res) {
+                    flowCommon.hideLoading();
+                    that.setData({
+                        NextNodeListResult: $.extend({}, res),
+                        NextNodeList: res.NextNodeList.concat()
+                    });
+
+                    that.renderNextNodeList(that.getData('NextNodeList'), 'TextNodelistsGroup');
+                }, function (err) {
+                    flowCommon.hideLoading();
+                    mui.alert(err);
+                });
+            },
+            // 选择人员之后 进行保存
+            SaveUserToInstanNode: function (selectedUsers, params) {
+                var that = this;
+                var currentSelectWorkFlow = that.getData("selectWorkFlow")[0];
+                var NodeList = that.getData("NodeList");
+                that.createCurrent(currentSelectWorkFlow);
+                var Current = that.getData("Current");
+                var obj = {
+                    MessageCode: MESSAGECODE,
+                    data: {
+                        SubOperate: "SaveUserToInstanNode",
+                        NodeCode: params.row.NodeCode,
+                        ConfigUserList: selectedUsers,
+                        Current: Current,
+                        FlowOperate: "SupplyFlow"
+                    }
+                };
+                var httpParams = {
+                    json: JSON.stringify(obj)
+                };
+
+                flowCommon.showLoading();
+                flowCommon.getAPIMessage(httpParams, function(res) {
+                    flowCommon.hideLoading();
+                    var errorNodeList = [];
+                    NodeList.forEach(function(item) {
+                        if (item.NodeCode == params.row.NodeCode) {
+                            item.CanSendUsers = selectedUsers.concat();
+                            item.Status = true;
+                        }
+
+                        if (!item.Status) {
+                            errorNodeList.push(item);
+                        }
+                    });
+                    that.setData({
+                        NodeList: NodeList.concat(),
+                        errorNodeList: errorNodeList.concat()
+                    });
+                    that.renderNodeLists(that.getData("NodeList"), 'NodelistsGroup');
+                }, function(err) {
+                    flowCommon.hideLoading();
+                    mui.alert(err);
+                });
+            },
+            // 提交数据
+            submitData: function () {
+                var that = this;
+                var MindInfo = $("#textarea").val();
+                var IsMindMustInput = that.getData("IsMindMustInput");
+                var msg = that.getSelectedNode()["msg"];
+
+                if (IsMindMustInput && !MindInfo) {
+                    mui.alert('审批意见不许为空');
+                    return false;
+                }
+
+                if (msg) {
+                    mui.alert(msg);
+                    return false;
+                }
+
+                var obj = {
+                    MessageCode: MESSAGECODE,
+                    data: {
+                        Current: that.getData("NextNodeListResult").Current,
+                        SelectedNode: that.getSelectedNode()["data"],
+                        MindInfo: MindInfo,
+                        VoteValue: "",
+                        VoteText: "",
+                        FlowOperate: "Send"
+                    }
+                };
+
+                var params = {
+                    json: JSON.stringify(obj)
+                };
+
+                flowCommon.showLoading("提交中...");
+                flowCommon.getAPIMessage(params, function(res) {
+                    flowCommon.hideLoading();
+                    flowCommon.showToast("提交完成，准备跳转...", function () {
+                        that.back();
+                    });
+                }, function (err) {
+                    flowCommon.hideLoading();
+                    mui.alert(err);
+                });
+            },
+            // 返回
+            back:function () {
+            if (window.m3app && window.m3app.AppCall) {
+                CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+            } else if (window.PowerM3AppCall) {
+                CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+            } else {
+                window.history.go("-1");
+            }
+            },
+            // 获取选择的数据
+            getSelectedNode: function () {
+                var that = this;
+                var msg = null;
+                var SelectedNodes = $("#TextNodelistsGroup").find(".text-node-list");
+                var arr = [];
+                SelectedNodes.each(function() {
+                    var node = $(this);
+                    var NodeCode = node.attr("data-code");
+                    var row = that.getData("NextNodeList").filter(function(item) {
+                        if (item.NodeCode == NodeCode) {
+                            return item
+                        }
+                    })[0];
+                    var UserLists = node.find("input.user-list");
+                    var SendUserList = [];
+                    var CopyUserList = [];
+
+                    UserLists.each(function() {
+                        var userList = $(this);
+                        var value = userList.val();
+                        var type = userList.attr('data-type');
+                        var checked = userList.prop("checked");
+
+                        if (checked) {
+                            if (type == 'CanSend') {
+                                var usermsg = row.CanSelectUsers.filter(function(item) {
+                                    if (item.UserID == value) {
+                                        return item;
+                                    }
+                                })[0];
+                                SendUserList.push(usermsg);
+                            } else {
+                                var usermsg = row.CanSelectCopyUsers.filter(function(item) {
+                                    if (item.UserID == value) {
+                                        return item;
+                                    }
+                                })[0];
+                                CopyUserList.push(usermsg);
+                            }
+                        }
+                    });
+                    var obj = {
+                        NodeCode: NodeCode,
+                        SendUserList: SendUserList,
+                        CopyUserList: CopyUserList
+                    };
+
+                    if (obj.SendUserList == 0 && row.IsMustNotUsers == false) {
+                        msg =  row.NodeName + "节点没有选择送审人员";
+                    }
+                    arr.push(obj);
+                });
+
+                return {
+                    data: arr,
+                    msg: msg
+                };
+            },
+            // 上一步
+            ToUpStep: function (step) {
+                this.controllBlock(step);
+            },
+            // 下一步
+            ToNextStep: function (step) {
+                var that = this;
+                var currentSelectWorkFlow = that.getData("selectWorkFlow")[0];
+
+                if (!currentSelectWorkFlow) {
+                    mui.alert('请选择一个流程');
+                    return false;
+                }
+
+                switch (step) {
+                    case 'NodeList':
+                        that.controllBlock(step);
+                        that.getNodeList();
+                        break;
+                    case 'TextNodeList':
+                        if (that.getData("errorNodeList").length > 0) {
+                            mui.alert('节点异常，请完善之后在提交');
+                            return false;
+                        }
+                        that.controllBlock(step);
+                        that.getTextNodeList();
+                        break;
+                }
+            },
+            // 打开人员选择面板
+            openSelectUserBlock: function (params) {
+                var iframeWrap = $("#iframeWrap");
+                var iframe = $("#myIframe");
+                iframeWrap.css("transform", "translate3d(0%, 0, 0)");
+                
+                iframe[0].contentWindow.getData(params);
+            },
+            // 关闭人员选择面板
+            closeSelectUserBlock: function (selectedUsers, params) {
+                var iframeWrap = $("#iframeWrap");
+                
+                iframeWrap.css("transform", "translate3d(100%, 0, 0)");
+                if (!selectedUsers || !params) {
+                    if (!selectedUsers && !params) {
+                        return false;
+                    } else {
+                        mui.alert("参数传递有误");
+                        return false;
+                    }
+                }
+
+                this.SaveUserToInstanNode(selectedUsers, params);
+            },
+            // 执行事件
+            events: function () {
+                var that = this;
+                that.setData({
+                    query: flowCommon.getQuery()
+                });
+
+                // 获取流程数据
+                flowCommon.showLoading();
+                that.getWorkFlowData(function() {
+                    flowCommon.hideLoading();
+                    var selectWorkFlow = that.getData("selectWorkFlow");
+                    if (selectWorkFlow.length > 0) {
+                        that.ToNextStep('NodeList');
+                    }
+                });
+
+                mui.init();
+            }
+        };
+
+        activeObject.init();
+    });
+</script>
+</html>

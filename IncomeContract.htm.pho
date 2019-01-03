@@ -261,20 +261,6 @@
         </div>
     </div>
 
-    <!-- 监控流程DOM容器 -->
-    <div class="monitor-content move-animation-start">
-        <div class="monitor-content-mask"></div>
-        <div class="monitor-content-main">
-            <div class="close-monitor-content">
-                <span class="mui-icon mui-icon-closeempty"></span>
-            </div>
-            <div class="lists-monitor-content" style="overflow: hidden;">
-                <div class="lists-monitor-content">
-                    <ul id="lists_monitor" class="mui-table-view lists_monitor"></ul>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- At人员向导的DOM容器 不可删 不许修改-->
     <div class="mui-content mui-wizard-content at-wizard move-animation-start">
         <header class="mui-bar mui-bar-nav">
@@ -318,6 +304,8 @@
 <script src="/Apps/newAppjs/appUtils.js?v=$AppVersion"></script>
 <script src="/Apps/newAppjs/appPhysicalUtils.js?v=$AppVersion"></script>
 <script src="/Apps/newAppjs/appFlowsEnums.js?v=$AppVersion"></script>
+<script src="/Apps/appWorkFlows/common/js/common.js?v=$AppVersion"></script>
+<script src="/Apps/appWorkFlows/common/js/workFlowAction.js?v=$AppVersion"></script>
 <script src="/Apps/newAppjs/AppForm.js?v=$AppVersion" type="text/javascript"></script>
 <script type="text/javascript">
     (function (mui, $) {
@@ -327,21 +315,16 @@
             // id text type callback都是必须的
             // id自定义(必须英文,别玩洋的，id中不允许有 . , 使用驼峰或者下划线 ) text按钮名称 type="extend"写死 
             // callback 必须添加 点击按钮触发的回调函数
-            btnExtend: [{
-                id: "btn1",
-                text: "自定义测试按钮1",
-                type: "extend",
-                callback: function (e) {
-                    mui.alert("btn1");
-                }
-            }, {
-                id: "btn2",
-                text: "自定义测试按钮2",
-                type: "extend",
-                callback: function (e) {
-                    mui.alert("btn2");
-                }
-            }],
+            btnExtend: [
+                // {
+                //     id: "btn1",
+                //     text: "自定义测试按钮1",
+                //     type: "extend",
+                //     callback: function (e) {
+                //         mui.alert("btn1");
+                //     }
+                // }
+            ],
             // 子表配置
             // 最好不超过两个子表
             childrenTables: {

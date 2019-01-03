@@ -1,0 +1,553 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>人员选择(App)</title>
+    <link href="/Apps/js/mui/css/mui.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/reset.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/common.css?v=6" rel="stylesheet" type="text/css" />
+    <script src="/Apps/js/jquery-1.8.3.min.js?v=6" type="text/javascript"></script>
+    <script src="/Apps/js/mui/js/mui.min.js?v=6" type="text/javascript"></script>
+    <style>
+        .select-user-content {
+          height: 100%;
+          width: 100%;
+          padding: 0;
+          margin: 0;
+        }
+
+        .select-user-content .select-user-main {
+          height: 100%;
+          width: 100%;
+          padding: 0;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .select-user-main .select-search-box {
+          flex: 0 0 40px;
+          height: 40px;
+          display: flex;
+          padding: 5px;
+        }
+
+        .select-search-box .mui-search {
+          flex: 1;
+        }
+        .select-search-box .mui-search input{
+          background-color: #ffffff;
+          padding: 5px 10px;
+          margin: 0;
+          height: 28px;
+          font-size: 14px;
+        }
+
+        .mui-input-row.mui-search .mui-icon-clear{
+          top: 4px;
+        }
+
+        .select-search-box .search-btn{
+          flex: 0 0 45px;
+          padding: 2px 5px;
+        }
+
+        .select-search-box .search-btn .btn-wrap {
+          display: block;
+          margin: 0 auto;
+          text-align: center;
+          background-color: #007ACC;
+          color: #ffffff;
+          border-radius: 3px;
+          line-height: 1;
+        }
+
+        .select-user-main .select-user-lists-wrap {
+          flex: 1;
+          height: 100%;
+          width: 100%;
+          position: relative;
+        }
+
+        .select-user-main .select-user-action {
+          flex: 0 0 40px;
+        }
+
+        .select-user-action {
+          display: flex;
+        }
+        .select-user-action .user-action-item {
+          flex: 1;
+          line-height: 40px;
+          position: relative;
+          text-align: center;
+          font-size: 14px;
+        }
+
+        .select-user-action .user-action-item::after{
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          right: 0;
+          width: 1px;
+          content: '';
+          -webkit-transform: scaleX(.5);
+          transform: scaleX(.5);
+          background-color: #c8c7cc;
+        }
+        .select-user-action .user-action-item:last-child::after{
+          width: 0;
+        }
+
+        .select-user-content .prev-selected-users {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 1000;
+          transition: all 0.3s;
+          transform: translate3d(100%, 0, 0);
+          display: flex;
+          flex-direction: column;
+          background-color: #ffffff;
+        }
+
+        .prev-selected-users .prev-title{
+          flex: 0 0 40px;
+          line-height: 40px;
+          padding: 0 10px;
+          font-size: 16px;
+        }
+
+        .prev-selected-users .prev-users-content {
+          flex: 1;
+          width: 100%;
+          height: 100%;
+          padding: 0 0 10px 0;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .prev-users-content .user-list {
+          display: flex;
+          width: 100%;
+        }
+
+        .prev-users-content .user-list .text-label {
+          flex: 1;
+          padding: 10px;
+        }
+
+        .prev-users-content .user-list .icon-wrap {
+          flex: 0 0 50px;
+          text-align: center;
+          line-height: 35px;
+        }
+
+        .user-list .icon-wrap .mui-icon {
+          font-size: 35px;
+        }
+
+        .prev-selected-users .prev-action {
+          flex: 0 0 40px;
+          line-height: 40px;
+          text-align: center;
+          font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+  <div id="selectUserContent" class="select-user-content">
+    <div class="select-user-main">
+      <div class="select-search-box bottom-line">
+        <div class="mui-input-row mui-search">
+          <input id="Search" type="text" class="mui-input-clear" placeholder="请输入姓名">
+        </div>
+        <div class="mui-input-row search-btn">
+          <span class="btn-wrap">
+            <span class="mui-icon mui-icon-search"></span>
+          </span>
+        </div>
+      </div>
+      <div class="select-user-lists-wrap">
+        <div id="pullrefresh" class="mui-content mui-scroll-wrapper">
+          <div class="mui-scroll">
+            <div id="UserList" class="mui-table-view mui-table-view-chevron"></div>
+          </div>
+        </div>
+      </div>
+      <div class="select-user-action top-line">
+        <div data-target="back" class="user-action-item">
+          返回
+        </div>
+        <div data-target="submit" class="user-action-item">
+          确定
+        </div>
+        <div data-target="prev" class="user-action-item">
+          预览
+        </div>
+      </div>
+    </div>
+    <div id="prevUsers" class="prev-selected-users">
+      <div class="prev-title bottom-line active-color">已选择的人员</div>
+      <div id="prevUserList" class="prev-users-content"></div>
+      <div id="closePrev" class="prev-action top-line">
+        关闭
+      </div>
+    </div>
+  </div>
+</body>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=6" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=6"></script>
+<script src="/Apps/appWorkFlows/common/js/common.js?v=6"></script>
+<script type="text/javascript">
+    $(function() {
+      var MESSAGECODE = "Power.WorkFlows.Actions.RecvFlowOperate";
+      var flowCommon = new WorkFlowCommon();
+      var AppSelectUser = {
+        init: function () {
+          this.events();
+          this.UIEvents();
+        },
+        data: {
+          searchKey: '',
+          parentParams: {},
+          index: 0,
+          size: 20,
+          pullType: 'down',
+          RecordCount: 0,
+          UserList: [],
+          selectedUsers: []
+        },
+        // 给data里面赋值
+        setData: function (obj) {
+          this.data = $.extend(this.data, obj);
+        },
+        // 获取data里面值
+        getData: function (name) {
+          return this.data[name];
+        },
+        UIEvents: function () {
+          var that = this;
+          window.getData = function(params) {
+            that.loadUserList(params);
+          };
+          // 初始化
+          mui.init({
+            pullRefresh: {
+              container: '#pullrefresh',
+              down: {
+                callback: function () {
+                  that.pulldownRefresh()
+                }
+              },
+              up: {
+                contentrefresh: '正在加载...',
+                callback: function() {
+                  that.pullupRefresh()
+                }
+              }
+            }
+          });
+
+          // 操作按钮的事件
+          $(".select-user-action").on("tap", ".user-action-item", function() {
+            var $this = $(this);
+            var target = $this.attr("data-target");
+            var parent = window.parent;
+            switch (target) {
+              case "back":
+                if (parent && parent.closeSelectUserBlock) {
+                  parent.closeSelectUserBlock();
+                } else {
+                  mui.alert("本页面需要嵌入在iframe框架里执行");
+                }
+                break;
+              case "prev":
+                that.openPrev();
+                break;
+              case "submit":
+                var selectedUsers = that.getData("selectedUsers");
+                if (parent && parent.closeSelectUserBlock) {
+                  var parentParams = that.getData("parentParams");
+                  parent.closeSelectUserBlock(selectedUsers, parentParams);
+                } else {
+                  mui.alert("本页面需要嵌入在iframe框架里执行");
+                }
+                break;
+              default:
+                mui.alert("正在开发中...");
+            }
+          });
+
+          // 人员选择事件
+          $("#UserList").on("change", "input[type='checkbox']", function() {
+            var checked = this.checked;
+            var val = this.value;
+
+            that.selectAndUnSelectUser(checked, val);
+          });
+
+          // 关闭预览面板
+          $("#closePrev").on("tap", function () {
+            that.closePrev();
+          });
+
+          // 在预览面板里面删除选中的人员
+          $("#prevUserList").on("tap", ".icon-wrap", function () {
+            var $this = $(this);
+            var UseRow = $this.closest(".user-list");
+            var UserID = $this.attr("data-id");
+            var selectedUsers = that.getData("selectedUsers");
+            var UserIDs = selectedUsers.map(function(item) { return item.UserID });
+            var index = UserIDs.indexOf(UserID);
+
+            selectedUsers.splice(index, 1);
+            that.setData({
+              selectedUsers: selectedUsers
+            });
+            UseRow.remove();
+
+            $("#UserList").find("input[type='checkbox']").each(function() {
+              var input = $(this);
+              var value = input.val();
+
+              if (value == UserID) {
+                input.prop("checked", false);
+              }
+            });
+          });
+
+          // 搜索事件
+          $(".search-btn").on("tap", function() {
+            var val = $.trim($("#Search").val());
+            if (val != "" || !val) {
+              that.setData({
+                searchKey: val,
+                index: 0,
+                size: 20,
+                pullType: "down"
+              });
+            } else {
+              that.setData({
+                searchKey: '',
+                index: 0,
+                size: 20,
+                pullType: "down"
+              });
+            }
+
+            that.getUserListsData();
+          });
+
+          // 搜索input框清空事件
+          $(".mui-search").on("tap", ".mui-icon-clear", function() {
+            that.setData({
+              searchKey: '',
+              index: 0,
+              size: 20,
+              pullType: "down"
+            });
+
+            that.getUserListsData();
+          });
+        },
+        // 打开预览面板
+        openPrev: function () {
+          $("#prevUsers").css("transform", "translate3d(0, 0, 0)")
+          this.renderPrevUsers();
+        },
+        // 关闭预览面板
+        closePrev: function () {
+          $("#prevUsers").css("transform", "translate3d(100%, 0, 0)")
+        },
+        // 下拉事件
+        pulldownRefresh: function () {
+          var that = this;
+          that.setData({
+            index: 0,
+            pullType: "down",
+            UserList: []
+          });
+
+          that.getUserListsData(function() {
+            mui('#pullrefresh').pullRefresh().endPulldownToRefresh();
+          });
+        },
+        // 上拉事件
+        pullupRefresh: function () {
+          var that = this;
+          var count = 0;
+          that.setData({
+            index: that.getData("index") + 1,
+            pullType: "up"
+          });
+
+          that.getUserListsData(function() {
+            mui('#pullrefresh').pullRefresh().endPullupToRefresh((++count > 2))
+          });
+        },
+        // 选择或者取消人员事件
+        selectAndUnSelectUser: function (checked, userId) {
+          var that = this;
+          var UserList = that.getData("UserList");
+          var selectedUsers = that.getData("selectedUsers");
+          var UserItem = UserList.filter(function(item) {
+            if (item.UserID == userId) {
+              return item;
+            }
+          })[0];
+          var selectedUserIds = selectedUsers.map(function(item) {
+            return item.UserID;
+          });
+
+          var index = selectedUserIds.indexOf(userId);
+          if (index == -1) {
+            selectedUsers.push(UserItem);
+          } else {
+            if (checked) {
+              selectedUsers.splice(index, 1);
+              selectedUsers.push(UserItem);
+            } else {
+              selectedUsers.splice(index, 1);
+            }
+          }
+
+          that.setData({
+            selectedUsers: selectedUsers.concat()
+          });
+        },
+        // 渲染人员数据
+        renderUserList: function (data, id, type) {
+          var that = this;
+          var html = '';
+          var pullType = that.getData("pullType");
+          var selectedUsers = that.getData("selectedUsers");
+          var UserIDs = selectedUsers.map(function(item) {
+            return item.UserID;
+          });
+
+          data.forEach(function(item) {
+            var index = UserIDs.indexOf(item.UserID);
+            var checked = index > -1 ? "checked" : '';
+            html += '<div class="mui-input-row mui-checkbox mui-right bottom-line">'+
+              '<label>'+ item.UserName +' ['+ item.DeptPositionName +']</label>'+
+              '<input '+ checked +' name="checkbox" value="'+ item.UserID +'" type="checkbox">'+
+              '</div>';
+          });
+
+          if (pullType == "down") {
+            $("#" + id).html(html);
+          } else {
+            $("#" + id).append(html);
+          }
+
+
+        },
+        // 渲染预览人员
+        renderPrevUsers: function () {
+          var html = '';
+          var that = this;
+          var data = that.getData("selectedUsers");
+
+          data.forEach(function(item, index) {
+            html += '<div class="user-list bottom-line">'+
+              '<div class="text-label active-color">'+ (index + 1) +'. '+ item.UserName +'</div>'+
+              '<div data-id="'+ item.UserID +'" class="icon-wrap">'+
+              '<span class="mui-icon mui-icon-closeempty"></span>'+
+              '</div>'+
+              '</div>';
+          });
+
+          $("#prevUserList").html(html);
+        },
+        // 获取人员数据
+        getUserListsData: function (callback) {
+          var that = this;
+          var pullType = that.getData("pullType");
+          var searchKey = that.getData("searchKey");
+          var where = "";
+          if (searchKey !== "") {
+            where += " and (x1.Code like '%"+ searchKey +"%' or x1.Name like'%"+ searchKey +"%')";
+          }
+          var obj = {
+            MessageCode: MESSAGECODE,
+            data: {
+              Where: where,
+              id: "",
+              Order: "x1.Name",
+              SubOperate: "ReadOnlyUserList",
+              SourceMode: "PositionAndUser",
+              pageIndex: that.getData("index"),
+              pageSize: that.getData("size"),
+              Current: {},
+              FlowOperate: "SupplyFlow"
+            }
+          };
+
+          var params = {
+            json: JSON.stringify(obj)
+          };
+
+          flowCommon.showLoading();
+          flowCommon.getAPIMessage(params, function(res) {
+            flowCommon.hideLoading();
+            var UserList = JSON.parse(res.UserList);
+
+            if (pullType == "down") {
+              that.setData({
+                RecordCount: parseInt(res.RecordCount),
+                UserList: UserList.concat()
+              });
+            } else if (pullType == "up") {
+              that.setData({
+                RecordCount: parseInt(res.RecordCount),
+                UserList: that.getData("UserList").concat(UserList)
+              });
+            }
+
+            if (that.getData("UserList").length >= that.getData("RecordCount")) {
+              var index = that.getData("index");
+              if (index > 0 ) {
+                that.setData({
+                  index: that.getData("index") - 1
+                });
+              } else {
+                that.setData({
+                  index: 0
+                });
+              }
+            }
+
+            that.renderUserList(UserList, "UserList");
+            callback && callback();
+          }, function (err) {
+            flowCommon.hideLoading();
+            mui.alert(err);
+          });
+        },
+        // 加载数据
+        loadUserList: function (params) {
+          var that = this;
+          that.setData({
+            parentParams: $.extend({}, params),
+            selectedUsers: params["users"].concat()
+          });
+          that.getUserListsData();
+        },
+        events: function () {
+          var that = this;
+        }
+      };
+
+      AppSelectUser.init();
+    });
+</script>
+</html>

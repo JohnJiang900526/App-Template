@@ -1,0 +1,436 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>委派反馈</title>
+    <link href="/Apps/js/mui/css/mui.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/reset.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/common.css?v=6" rel="stylesheet" type="text/css" />
+    <script src="/Apps/js/jquery-1.8.3.min.js?v=6" type="text/javascript"></script>
+    <script src="/Apps/js/mui/js/mui.min.js?v=6" type="text/javascript"></script>
+    <style>
+        .delegate-content {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .delegate-content .delegate-main {
+          flex: 1;
+          height: 100%;
+          width: 100%;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .delegate-content .delegate-action {
+          flex: 0 0 40px;
+          line-height: 40px;
+          display: flex;
+          background-color: #ffffff;
+        }
+
+        .delegate-content .delegate-action .delegate-action-item {
+          flex: 1;
+          text-align: center;
+          font-size: 14px;
+          position: relative;
+        }
+
+        .delegate-action .delegate-action-item::after{
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          right: 0;
+          width: 1px;
+          content: '';
+          -webkit-transform: scaleX(.5);
+          transform: scaleX(.5);
+          background-color: #c8c7cc;
+        }
+
+        .delegate-action .delegate-action-item:last-child:after{
+          width: 0;
+        }
+
+        .delegate-item-list {
+          width: 100%;
+          padding: 0;
+        }
+
+        .delegate-item-list .list-title {
+          padding: 0 10px;
+          line-height: 35px;
+          font-size: 14px;
+        }
+
+        .delegate-item-list .list-title .select-user {
+          float: right;
+        }
+
+        .delegate-item-list .list-content {
+          background-color: #ffffff;
+        }
+
+        .delegate-item-list .list-content label{
+          font-size: 14px;
+        }
+
+        .delegate-item-list .list-content .mui-input-row {
+          border-bottom: 1px dotted #c8c7cc;
+        }
+
+        .delegate-item-list .list-content .mui-input-row:last-child {
+          border-bottom: none;
+        }
+
+        textarea {
+          font-size: 14px;
+          padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+  <div class="delegate-content">
+    <div class="delegate-main">
+      <div class="delegate-item-list">
+        <div class="list-title active-color">委派模式:</div>
+        <div id="methods" class="list-content">
+          <div class="mui-input-row mui-checkbox">
+						<label>串行</label>
+						<input disabled name="checkbox" value="Serial" type="checkbox">
+          </div>
+          <div class="mui-input-row mui-checkbox">
+						<label>并行</label>
+						<input disabled name="checkbox" value="Parallel" type="checkbox">
+					</div>
+        </div>
+      </div>
+
+      <div class="delegate-item-list">
+        <div class="list-title active-color">是否返还给发起人:</div>
+        <div class="list-content">
+          <div class="mui-input-row mui-checkbox">
+						<label>是否返还给发起人:</label>
+						<input disabled id="backToRoot" name="checkbox" value="" type="checkbox">
+          </div>
+        </div>
+      </div>
+
+      <div class="delegate-item-list">
+        <div class="list-title active-color">
+          <span>人员列表:</span>
+        </div>
+        <div id="UserListContent" class="list-content"></div>
+      </div>
+
+      <div class="delegate-item-list">
+        <div class="list-title active-color">提交意见:</div>
+        <div class="list-content">
+          <div class="mui-input-row" style="padding: 10px">
+            <textarea id="textarea" rows="4" style="margin-bottom: 0" placeholder="输入意见"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="delegate-action top-line">
+      <div data-target="back" class="delegate-action-item">
+        返回
+      </div>
+      <div data-target="submit" class="delegate-action-item">
+        提交
+      </div>
+    </div>
+  </div>
+</body>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=6" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=6"></script>
+<script src="/Apps/appWorkFlows/common/js/common.js?v=6"></script>
+<script type="text/javascript">
+    $(function() {
+      var MESSAGECODE = "Power.WorkFlows.Actions.RecvFlowOperate";
+      var flowCommon = new WorkFlowCommon();
+      var delegateObj = {
+        init: function () {
+          this.events();
+          this.UIEvents();
+        },
+        data: {
+          query: {
+            FormId: "",
+            FormState: "",
+            KeyValue: "",
+            KeyWord: "",
+            SequeID: ""
+          },
+          DelegateInfo: {},
+          RootUserInfo: {},
+          UserList: [],
+          DelegateMode: "",
+          IsReturnRoot: false
+        },
+        // 给data里面赋值
+        setData: function (obj) {
+          this.data = $.extend(this.data, obj);
+        },
+        // 获取data里面值
+        getData: function (name) {
+          return this.data[name];
+        },
+        // 返回
+        back:function () {
+          if (window.m3app && window.m3app.AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else if (window.PowerM3AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else {
+            window.history.go("-1");
+          }
+        },
+        // UI事件
+        UIEvents: function () {
+          var that = this;  
+          // 操作事件
+          $(".delegate-action-item").on("tap", function () {
+            var $this = $(this);
+            var target = $this.attr("data-target");
+
+            switch (target) {
+              case "submit":
+                that.submitData();
+                break;
+              case "back":
+                that.back();
+                break;
+              default:
+              return false;
+            }
+          });
+          
+          // 模式切换事件
+          $("#methods input").on("change", function () {
+            var $this = $(this);
+            var checked = $this.prop("checked");
+            var parent = $this.parent();
+            var val = $this.val();
+
+            if (checked) {
+              parent.siblings().find("input").prop("checked", false);
+              that.setData({
+                DelegateMode: val
+              });
+            } else {
+              that.setData({
+                DelegateMode: ""
+              });
+            }
+
+            that.renderUserList();
+          });
+
+          // 是否返还给发起人
+          $("#backToRoot").on("change", function () {
+            var $this = $(this);
+            var checked = $this.prop("checked");
+            
+            that.setData({
+              IsReturnRoot: checked
+            });
+
+            that.renderUserList();
+          });
+        },
+        
+        // 提交数据
+        submitData: function () {
+          var that = this;
+          var MindInfo = $.trim($("#textarea").val());
+          var IsReturnRoot = that.getData("IsReturnRoot");
+          var DelegateMode = that.getData("DelegateMode");
+
+          if (MindInfo == "" || !MindInfo) {
+            mui.alert("请填写意见");
+            return false;
+          }
+
+          if (DelegateMode == "" || !DelegateMode) {
+            mui.alert("请选择一种驳回模式");
+            return false;
+          }
+
+          var obj = {
+            MessageCode: MESSAGECODE,
+            data: {
+              Current: that.getData("DelegateInfo").Current,
+              FlowOperate: "Delegate",
+              MindInfo: MindInfo,
+              Mode: {
+                DelegateMode: DelegateMode,
+                IsReturnRoot: IsReturnRoot
+              },
+              VoteText: "",
+              VoteValue: ""
+            }
+          };
+
+          var params = {
+            json: JSON.stringify(obj)
+          };
+
+          flowCommon.showLoading("提交中...");
+          flowCommon.getAPIMessage(params, function (res) {
+            flowCommon.hideLoading();
+            flowCommon.showToast("提交完成，准备跳转...", function () {
+              that.back();
+            });
+          }, function (err) {
+            flowCommon.hideLoading();
+            mui.alert(err);
+          });
+        },
+        // 渲染人员列表
+        renderUserList: function () {
+          var that = this;
+          var html = '';
+          var UserList = that.getData("UserList");
+          var DelegateMode = that.getData("DelegateMode");
+          var IsReturnRoot = that.getData("IsReturnRoot");
+          var RootUserInfo = that.getData("RootUserInfo");
+          var data = [];
+
+          if (IsReturnRoot) {
+            data = [RootUserInfo].concat(UserList, [RootUserInfo]);
+          } else {
+            data = [RootUserInfo].concat(UserList);
+          }
+
+          if (UserList.length == 0) {
+            data = [];
+          }
+
+          data.forEach(function (item, index) {
+            var lablel = '';
+            if (IsReturnRoot) {
+              if (index == 0) {
+                lablel = '<label>'+ item.UserName +' --> </label>'
+              } else if (index != 0 && index != (data.length - 1)) {
+                lablel = DelegateMode == "Serial" ? 
+                '<label> --> '+ item.UserName +' --> </label>':
+                '<label> --> '+ item.UserName +'</label>'
+              } else {
+                lablel = '<label> --> '+ item.UserName +'</label>'
+              }
+            } else {
+              if (index == 0) {
+                lablel = '<label>'+ item.UserName +' --> </label>'
+              } else if (index != 0 && index != (data.length - 1)) {
+                
+                lablel = DelegateMode == "Serial" ? 
+                  '<label> --> '+ item.UserName +' --> </label>':
+                  '<label> --> '+ item.UserName +'</label>'
+              } else {
+                lablel = '<label> --> '+ item.UserName +'</label>'
+              }
+            }
+            html += '<div class="mui-input-row mui-checkbox">'+ lablel + '</div>';
+          });
+
+          if (data.length == 0) {
+            html = '<div class="mui-input-row mui-checkbox">'+
+              '<label>暂无人员</label>'+
+              '</div>';
+          }
+
+          $("#UserListContent").html(html);
+        },
+        // 获取数据之后进行赋值
+        afterGetDelegate: function () {
+          var that = this;
+          var DelegateItem = that.getData("DelegateInfo").DelegateItem;
+          
+          if (DelegateItem) {
+            that.setData({
+              UserList: DelegateItem.UserList || [],
+              DelegateMode: DelegateItem.DelegateMode || '',
+              RootUserInfo: DelegateItem.RootUserInfo,
+              IsReturnRoot: DelegateItem.IsReturnRoot
+            });
+          }
+
+          var DelegateMode = that.getData("DelegateMode");
+          var IsReturnRoot = that.getData("IsReturnRoot");
+          
+          if (DelegateMode) {
+            $("#methods input").each(function () {
+              var $this = $(this);
+              var val = $this.val();
+              if (val == DelegateMode) {
+                $this.prop("checked", true);
+              } else {
+                $this.prop("checked", false);
+              }
+            });
+          }
+
+          $("#backToRoot").prop("checked", IsReturnRoot);
+
+          that.renderUserList();
+        },
+        // 获取委派初始数据
+        getDelegateData: function () {
+          var that = this;
+          var obj = {
+            MessageCode: MESSAGECODE,
+            data: {
+              SubOperate: "ReadDelegateUsers",
+              FlowOperate: "SupplyInstance",
+              Current: that.getData("Current")
+            }
+          };
+          var params = {
+            json: JSON.stringify(obj)
+          };
+
+          flowCommon.showLoading();
+          flowCommon.getAPIMessage(params, function (res) {
+            flowCommon.hideLoading();
+            that.setData({
+              DelegateInfo: res
+            });
+
+            that.afterGetDelegate();
+          }, function (err) {
+            flowCommon.hideLoading();
+            mui.alert(err);
+          });
+        },
+        events: function () {
+          var that = this;
+          var query = flowCommon.getQuery();
+          that.setData({
+            query: $.extend({}, query),
+            Current: {
+              FormId: query.FormId,
+              KeyValue: query.KeyValue,
+              KeyWord: query.KeyWord,
+              SequeID: query.SequeID,
+              FormState: query.FormState
+            }
+          });
+
+          that.getDelegateData();
+        }
+      };
+
+      delegateObj.init();
+    });
+</script>
+</html>

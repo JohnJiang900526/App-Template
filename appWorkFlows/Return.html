@@ -1,0 +1,573 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>驳回</title>
+    <link href="/Apps/js/mui/css/mui.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/reset.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/common.css?v=6" rel="stylesheet" type="text/css" />
+    <script src="/Apps/js/jquery-1.8.3.min.js?v=6" type="text/javascript"></script>
+    <script src="/Apps/js/mui/js/mui.min.js?v=6" type="text/javascript"></script>
+    <style>
+        .return-content {
+          height: 100%;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .return-content .return-title {
+          background-color: #ffffff;
+          font-size: 14px;
+          flex: 0 0 40px;
+          line-height: 40px;
+          padding: 0 10px;
+        }
+
+        .return-content .return-action {
+          flex: 0 0 40px;
+          line-height: 40px;
+          background-color: #ffffff;
+          display: flex;
+        }
+
+        .return-action .return-action-item {
+          text-align: center;
+          font-size: 14px;
+          flex: 1;
+          position: relative;
+        }
+
+        .return-action .return-action-item::after{
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          right: 0;
+          width: 1px;
+          content: '';
+          -webkit-transform: scaleX(.5);
+          transform: scaleX(.5);
+          background-color: #c8c7cc;
+        }
+
+        .return-action .return-action-item:last-child::after{
+          width: 0;
+        }
+
+        .return-content .return-main {
+          flex: 1;
+          height: 100%;
+          width: 100%;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .return-main .return-NextNodeList-conetnt {
+          min-height: 25%;
+          max-height: 35%;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          background-color: #ffffff;
+        }
+
+        .return-MinInfo .return-MinInfo-title {
+          font-size: 14px;
+          padding: 10px;
+        }
+
+        .return-MinInfo .return-MinInfo-content {
+          padding: 0px 5px 5px 5px;
+        }
+
+        .return-MinInfo .return-MinInfo-content textarea{
+          font-size: 14px;
+        }
+
+        .return-mode .return-mode-title{
+          font-size: 14px;
+          padding: 10px;
+        }
+
+        .return-mode .return-mode-content {
+          background-color: #ffffff;
+        }
+
+        .return-mode .return-mode-content label{
+          font-size: 14px;
+        }
+        .return-NextNodeList-conetnt .node-list-title label{
+          border-left: 3px solid #007aff;
+        }
+        .return-NextNodeList-conetnt label{
+          font-size: 14px;
+        }
+
+        .return-NextNodeList-conetnt .user-lists label{
+          color: rgba(0, 0, 0, 0.6);
+        }
+    </style>
+</head>
+<body>
+  <div class="return-content">
+    <div class="return-title bottom-line active-color">
+      人员选择:
+    </div>
+    <div class="return-main">
+      <div id="ReturnNodeList" class="return-NextNodeList-conetnt"></div>
+      <div class="return-mode">
+        <div class="return-mode-title active-color bottom-line">
+          发送模式:
+        </div>
+        <div id="ModeLists" class="return-mode-content">
+          <div class="mui-input-row mui-checkbox bottom-line">
+            <label>正常驳回</label>
+            <input class="mode-item" name="checkbox" value="Normal" type="checkbox" checked>
+          </div>
+          <div class="mui-input-row mui-checkbox bottom-line">
+            <label>直接送还本节点(点对点)</label>
+            <input class="mode-item" name="checkbox" value="MustSendCurrent" type="checkbox">
+          </div>
+          <div class="mui-input-row mui-checkbox">
+            <label>正常驳回，且收件人只能常规发送</label>
+            <input class="mode-item" name="checkbox" value="MustReturnAndNormal" type="checkbox">
+          </div>
+        </div>
+      </div>
+      <div class="return-MinInfo">
+        <div class="return-MinInfo-title active-color">
+          提交意见:
+        </div>
+        <div class="return-MinInfo-content">
+          <div class="mui-input-row">
+              <textarea id="textarea" rows="4" placeholder="输入驳回意见"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="return-action top-line">
+      <div data-target="back" class="return-action-item">
+        返回
+      </div>
+      <div data-target="submit" class="return-action-item">
+        提交
+      </div>
+    </div>
+  </div>
+</body>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=6" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=6"></script>
+<script src="/Apps/appWorkFlows/common/js/common.js?v=6"></script>
+<script type="text/javascript">
+    $(function() {
+      var MESSAGECODE = "Power.WorkFlows.Actions.RecvFlowOperate";
+      var flowCommon = new WorkFlowCommon();
+      var stopObj = {
+        init: function () {
+          this.events();
+          this.UIEvents();
+        },
+        data: {
+          query: {
+            FormId: "",
+            FormState: "",
+            KeyValue: "",
+            KeyWord: "",
+            SequeID: ""
+          },
+          Current: {
+            FormId: "",
+            KeyValue: "",
+            KeyWord: "",
+            SequeID: ""
+          },
+          ReturnInfo: {},
+          NextNodeList: [],
+          Mode: "Normal"
+        },
+        // 给data里面赋值
+        setData: function (obj) {
+          this.data = $.extend(this.data, obj);
+        },
+        // 获取data里面值
+        getData: function (name) {
+          return this.data[name];
+        },
+        // 返回
+        back:function () {
+          if (window.m3app && window.m3app.AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else if (window.PowerM3AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else {
+            window.history.go("-1");
+          }
+        },
+        // UI事件
+        UIEvents: function () {
+          var that = this;
+
+          // 模式选择
+          $("#ModeLists").on("change", "input", function () {
+            var $this = $(this);
+            var checked = $this.prop("checked");
+            var row = $this.closest(".mui-input-row");
+            
+            if (checked) {
+              row.siblings().find("input").prop("checked", false);
+            }
+
+            that.getReturnMode();
+          });
+
+          // 节点选择事件
+          $("#ReturnNodeList").on("change", "input.next-node-list-input", function () {
+            var $this = $(this);
+            var checked = $this.prop("checked");
+            var NextNodeList = $this.closest(".next-node-list");
+            var UserLists = NextNodeList.find(".user-lists");
+            var UserListsInput = UserLists.find("input.user-list");
+            
+            if (NextNodeList.size() == 1) {
+              $this.prop("checked", true);
+              if (UserListsInput.size() == 1) {
+                UserListsInput.prop("checked", true);
+              }
+            } else {
+              if (checked) {
+                UserListsInput.prop("checked", true);
+              } else {
+                UserListsInput.prop("checked", false);
+              }
+            }
+          });
+
+          // 人员选择事件
+          $("#ReturnNodeList").on("change", "input.user-list", function () {
+            var $this = $(this);
+            var checked = $this.prop("checked");
+            var ItemList = $this.closest("div.item-list");
+            var UsersInput = ItemList.find("input.user-list");
+
+            if (UsersInput.size() == 1) {
+              $this.prop("checked", true);
+            }
+          });
+        
+          $(".return-action-item").on("tap", function () {
+            var $this = $(this);
+            var target = $this.attr("data-target");
+
+            switch (target) {
+              case "submit":
+                that.submitData();
+                break;
+              case "back":
+                that.back();
+                break;
+              default:
+              return false;
+            }
+          });
+        },
+        // 渲染人员列表
+        renderUserList: function (itemList, NextNodeList) {
+          var html = '';
+          var UserList = itemList.UserList;
+          var OtherUserList = itemList.OtherUserList;
+          var data = UserList.concat(OtherUserList);
+          UserList.forEach(function (item) {
+            var checked = '';
+            if (data.length == 1) {
+              if (NextNodeList.length == 1) {
+                checked = "checked";
+              } else {
+                checked = '';
+              }
+            } else {
+              checked = '';
+            }
+            html += '<div class="mui-input-row mui-checkbox bottom-line">' +
+              '<label>'+ item.UserName +'</label>' +
+              '<input '+ checked +' data-type="UserList" class="user-list" name="checkbox" value="'+ item.UserID +'" type="checkbox">' +
+              '</div>';
+          });
+
+          OtherUserList.forEach(function (item) {
+            var checked = '';
+            if (data.length == 1) {
+              if (NextNodeList.length == 1) {
+                checked = "checked";
+              } else {
+                checked = '';
+              }
+            } else {
+              checked = '';
+            }
+            html += '<div class="mui-input-row mui-checkbox bottom-line">' +
+              '<label>'+ item.UserName +'</label>' +
+              '<input '+ checked +' data-type="UserList" class="user-list" name="checkbox" value="'+ item.UserID +'" type="checkbox">' +
+              '</div>';
+          });
+
+          return html;
+        },
+        // 渲染ItemList
+        renderItemList: function (data, NextNodeList) {
+          var html = '', that = this;
+          data.forEach(function (item, index) {
+            var UserList = that.renderUserList(item, NextNodeList);
+            var ItemListTitle = data.length ==1 ? '' : '<label>第'+ (index + 1) +'条</label>';
+            html += '<div data-index="'+ index +'" class="item-list">'+ 
+            '<div class="item-list-title">'+
+            '<div class="ItemList-title mui-input-row mui-checkbox">' +
+            ItemListTitle +
+            '</div>' +
+            '<div class="ItemUser-lists">'+ UserList +'</div>' +
+            '</div>' +
+            '</div>';
+          });
+          return html;
+        },
+        // 渲染人员节点
+        renderNextNodeList: function (data, id) {
+          var that = this;
+          var html = '';
+
+          data.forEach(function (item) {
+            var UserList = '';
+            var checked = data.length == 1 ? "checked" : "";
+            UserList = that.renderItemList(item.ItemList, data);
+              html += '<div data-name="'+ item.NodeName +'" data-code="'+ item.NodeCode +'" class="next-node-list">' +
+              '<div class="node-list-title mui-input-row mui-checkbox bottom-line">' +
+              '<label>'+ item.NodeName +'</label>' +
+              '<input '+ checked +' class="next-node-list-input" name="checkbox" type="checkbox">' +
+              '</div>' +
+              '<div class="user-lists">' + UserList + '</div>' +
+              '</div>';
+          });
+
+          $("#" + id).html(html);
+        },
+        // 模式获取
+        getReturnMode: function () {
+          var that = this;
+          var modeInputs =  $("#ModeLists").find("input");
+          var Mode = '';
+          modeInputs.each(function () {
+            var $this = $(this);
+            var checked = $this.prop("checked");
+            var val = $this.val();
+
+            if (checked) {
+              Mode = val;
+            }
+          });
+
+          that.setData({
+            Mode: Mode
+          });
+        },
+        // 验证数据
+        valiData: function (mindInfo, node) {
+          var obj = {
+            msg: '',
+            pass: true
+          }
+          if (!mindInfo || mindInfo === '') {
+            obj.msg = '意见不能为空'
+            obj.pass = false
+
+            return obj
+          }
+
+          if (!node || node.length === 0) {
+            obj.msg = '人员节点不能为空'
+            obj.pass = false
+
+            return obj
+          }
+
+          node.forEach((nodeItem, nodeIndex) => {
+            var itemList = nodeItem.ItemList
+            if (!itemList || itemList.length === 0) {
+              obj.msg = '人员节点列不能为空'
+              obj.pass = false
+
+              return obj
+            }
+
+            itemList.forEach((userItem, userIndex) => {
+              var userList = userItem.UserList
+
+              if (!userList || userList.length === 0) {
+                obj.msg = '选择人员不能为空'
+                obj.pass = false
+
+                return obj
+              }
+            })
+          })
+
+          return obj
+        },
+        // 获取节点里面的人员信息
+        getSelectedNode: function () {
+          var arr = [], that = this;
+          var nextLodeList = $("#ReturnNodeList").find(">.next-node-list");
+          var Mode = that.getData("Mode");
+          var NextNodeListDatas = that.getData("NextNodeList");
+          
+          nextLodeList.each(function () {
+            var $NextNodeList = $(this);
+            var obj = {
+              NodeCode: $NextNodeList.attr("data-code"),
+              NodeName: $NextNodeList.attr("data-name"),
+              ReturnedSendMode: Mode,
+              ItemList: []
+            };
+            var ItemLists = $NextNodeList.find(".user-lists>.item-list");
+            ItemLists.each(function () {
+              var ItemList = $(this);
+              var ItemListData = NextNodeListDatas[$NextNodeList.index()].ItemList[ItemList.index()];
+              var UserListData = ItemListData.UserList;
+              var OtherUserListData = ItemListData.OtherUserList;
+              var ItemListObj = {
+                BeforeSequeID: ItemListData.BeforeSequeID,
+                OtherUserList: [],
+                UserList: []
+              };
+              var inputs = ItemList.find("input");
+              
+              inputs.each(function () {
+                var inputUser = $(this);
+                var type = inputUser.attr("data-type");
+                var val = inputUser.val();
+                if (type == "UserList") {
+                  var userItem = UserListData.filter(function (item) {
+                    if (item.UserID == val) {
+                      return item;
+                    }
+                  })[0];
+                  ItemListObj.UserList.push(userItem);
+                } else {
+                  var userItem = OtherUserListData.filter(function (item) {
+                    if (item.UserID == val) {
+                      return item;
+                    }
+                  })[0];
+                  ItemListObj.OtherUserList.push(userItem);
+                }
+              });
+              
+              obj.ItemList.push(ItemListObj);
+            });
+
+            arr.push(obj);
+          });
+
+          return arr;
+        },
+        // 获取return 里面的数据
+        getReturnData: function () {
+          var that = this;
+          var Current = that.getData("Current");
+
+          var obj = {
+            MessageCode: MESSAGECODE,
+            data: {
+              SubOperate: "ReadReturnNodeList",
+              SequeID: Current.SequeID,
+              Current: Current,
+              FlowOperate: "SupplyInstance"
+            }
+          };
+
+          var params = {
+            json: JSON.stringify(obj)
+          };
+          flowCommon.showLoading();
+          flowCommon.getAPIMessage(params, function (res) {
+            flowCommon.hideLoading();
+            that.setData({
+              ReturnInfo: $.extend({}, res),
+              NextNodeList: res.NextNodeList || []
+            });
+
+            that.renderNextNodeList(that.getData("NextNodeList"), "ReturnNodeList");
+
+            that.getSelectedNode();
+          }, function (err) {
+            flowCommon.hideLoading();
+            mui.alert(err);
+          });
+        },
+        // 提交数据
+        submitData: function () {
+          var that = this;
+          var MindInfo = $.trim($("#textarea").val());
+          var Mode = that.getData("Mode");
+          var Nodes = that.getSelectedNode();
+          var valil = that.valiData(MindInfo, Nodes);
+
+          if (!valil.pass) {
+            mui.alert(valil.msg);
+            return false;
+          }
+
+          if (Mode == "" || !Mode) {
+            mui.alert("请选择一种发送模式");
+            return false;
+          }
+
+          var obj = {
+            MessageCode: MESSAGECODE,
+            data: {
+              Current: that.getData("ReturnInfo").Current,
+              FlowOperate: "Return",
+              MindInfo: MindInfo,
+              SelectedNode: Nodes
+            }
+          };
+
+          var params = {
+            json: JSON.stringify(obj)
+          };
+
+          flowCommon.showLoading("提交中...");
+          flowCommon.getAPIMessage(params, function (res) {
+            flowCommon.hideLoading();
+            flowCommon.showToast("提交完成，准备跳转...", function () {
+              that.back();
+            });
+          }, function (err) {
+            flowCommon.hideLoading();
+            mui.alert(err);
+          });
+        },
+        events: function () {
+          var that = this;
+          var query = flowCommon.getQuery();
+          that.setData({
+            query: $.extend({}, query),
+            Current: {
+              FormId: query.FormId,
+              KeyValue: query.KeyValue,
+              KeyWord: query.KeyWord,
+              SequeID: query.SequeID
+            }
+          });
+
+          that.getReturnData();
+        }
+      };
+
+      stopObj.init();
+    });
+</script>
+</html>

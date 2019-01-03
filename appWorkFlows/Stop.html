@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>终止</title>
+    <link href="/Apps/js/mui/css/mui.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/reset.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/common.css?v=6" rel="stylesheet" type="text/css" />
+    <script src="/Apps/js/jquery-1.8.3.min.js?v=6" type="text/javascript"></script>
+    <script src="/Apps/js/mui/js/mui.min.js?v=6" type="text/javascript"></script>
+    <style>
+        .stop-content {
+          height: 100%;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          background-color: #ffffff;
+        }
+        .stop-content .stop-flow-title {
+          flex: 0 0 40px;
+          line-height: 40px;
+          font-size: 14px;
+          padding: 0 10px;
+        }
+
+        .stop-content  .stop-flow-content {
+          flex: 1;
+          padding: 5px;
+          background-color: #EBEBEB;
+        }
+
+        .stop-content  .stop-flow-content textarea {
+          font-size: 14px;
+        }
+
+        .stop-content .stop-action {
+          flex: 0 0 40px;
+          line-height: 40px;
+          display: flex;
+        }
+
+        .stop-content .stop-action .stop-action-item {
+          text-align: center;
+          font-size: 14px;
+          position: relative;
+          flex: 1;
+        }
+
+        .stop-content .stop-action .stop-action-item::after{
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          right: 0;
+          width: 1px;
+          content: '';
+          -webkit-transform: scaleX(.5);
+          transform: scaleX(.5);
+          background-color: #c8c7cc;
+        }
+
+        .stop-content .stop-action .stop-action-item:last-child::after{
+          width: 0;
+        }
+    </style>
+</head>
+<body>
+  <div class="stop-content">
+    <div class="stop-flow-title active-color bottom-line">
+        输入意见：
+    </div>
+    <div class="stop-flow-content">
+        <div class="mui-input-row" style="padding: 10px 0px 0 0px;">
+            <textarea id="textarea" rows="4" placeholder="输入意见"></textarea>
+        </div>
+    </div>
+    <div class="stop-action">
+      <div data-target="back" class="stop-action-item">返回</div>
+      <div data-target="submit" class="stop-action-item">提交</div>
+    </div>
+  </div>
+</body>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=6" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=6"></script>
+<script src="/Apps/appWorkFlows/common/js/common.js?v=6"></script>
+<script type="text/javascript">
+    $(function() {
+      var MESSAGECODE = "Power.WorkFlows.Actions.RecvFlowOperate";
+      var flowCommon = new WorkFlowCommon();
+      var stopObj = {
+        init: function () {
+          this.events();
+          this.UIEvents();
+        },
+        data: {
+          query: {
+            FormId: "",
+            FormState: "",
+            KeyValue: "",
+            KeyWord: "",
+            SequeID: ""
+          },
+          stopInfo: {}
+        },
+        // 给data里面赋值
+        setData: function (obj) {
+          this.data = $.extend(this.data, obj);
+        },
+        // 获取data里面值
+        getData: function (name) {
+          return this.data[name];
+        },
+        // 获取初始数据
+        getStopInfoData: function () {
+          var that = this;
+          var Current = that.getData("Current");
+          var obj = {
+            MessageCode: MESSAGECODE,
+            data: {
+              SubOperate: "GetCurrentSeque",
+              SequeID: Current.SequeID,
+              Current: Current,
+              FlowOperate: "SupplyInstance"
+            }
+          };
+          var params = {
+            json: JSON.stringify(obj)
+          };
+
+          flowCommon.showLoading();
+          flowCommon.getAPIMessage(params, function (res) {
+            flowCommon.hideLoading();
+            that.setData({
+              stopInfo: $.extend({}, res)
+            });
+          }, function (err) {
+            flowCommon.hideLoading();
+            mui.alert(err);
+          });
+        },
+        // 提交终止的意见数据
+        submitStopData: function () {
+          var that = this;
+          var MindInfo = $.trim($("#textarea").val());
+
+          if (!MindInfo || MindInfo == "") {
+            mui.alert("意见不许为空");
+            return false;
+          }
+
+          var obj = {
+            OpenTrans: "true",
+            Stop: {
+              MessageCode: MESSAGECODE,
+              data: {
+                Current: that.getData("Current"),
+                MindInfo: MindInfo,
+                FlowOperate: "Stop"
+              }
+            }
+          };
+          var params = {
+            json: JSON.stringify(obj)
+          };
+
+          flowCommon.showLoading();
+          flowCommon.getAPIMessages(params, function (res) {
+            flowCommon.hideLoading();
+            flowCommon.showToast("提交完成，准备跳转...", function () {
+              that.back();
+            });
+          }, function (err) {
+            flowCommon.hideLoading();
+            mui.alert(err);
+          });
+        },
+        // 返回
+        back:function () {
+          if (window.m3app && window.m3app.AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else if (window.PowerM3AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else {
+            window.history.go("-1");
+          }
+        },
+        // UI事件
+        UIEvents: function () {
+          var that = this;
+
+          $(".stop-action-item").on("tap", function () {
+            var $this =  $(this);
+            var target = $this.attr("data-target");
+
+            switch (target) {
+              case "submit":
+                that.submitStopData();
+                break;
+              case "back":
+                that.back();
+                break;
+              default: 
+                return false;
+            }
+          });
+        },
+        events: function () {
+          var that = this;
+          var query = flowCommon.getQuery();
+          that.setData({
+            query: $.extend({}, query),
+            Current: {
+              FormId: query.FormId,
+              KeyValue: query.KeyValue,
+              KeyWord: query.KeyWord,
+              SequeID: query.SequeID
+            }
+          });
+
+          that.getStopInfoData();
+        }
+      };
+
+      stopObj.init();
+    });
+</script>
+</html>
