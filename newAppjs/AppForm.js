@@ -1573,15 +1573,18 @@ function AppForm() {
         //如果绑定了工作流体系，则设定工作流按钮 在操作表中 
         setFlowResult: function () {
             var that = this;
-            // "HangUp", "UnHangUp", "DelayDate", "UnEndFlow"
             var Actions = [
-                { id: "Active", text: "送审", type: "default" },
-                { id: "Send", text: "同意", type: "default" },
-                { id: "Return", text: "驳回", type: "default" },
-                { id: "GetBack", text: "回收", type: "default" },
-                // { id: "Stop", text: "终止", type: "default"},
-                { id: "ShowMonitor", text: "监控", type: "default" },
-                { id: "saveMainTable", text: "保存主表", type: "default" } // 这个不是审批流中的操作 但是要加进去
+                { id: "Active", text: "送审", type: "default", code: 1 },
+                { id: "Send", text: "同意", type: "default", code: 2 },
+                { id: "Return", text: "驳回", type: "default", code: 3 },
+                { id: "GetBack", text: "回收", type: "default", code: 4 },
+                { id: "Stop", text: "终止", type: "default", code: 5},
+                { id: "ShowMonitor", text: "监控", type: "default", code: 6 },
+                { id: "ShowHistoryMonitor", text: "历史", type: "default", code: 7 },
+                { id: "Delegate", text: "委派", type: "default", code: 8 },
+                { id: "Delegateing", text: "委派反馈", type: "default", code: 9 },
+                // 这个不是审批流中的操作 但是要加进去
+                { id: "saveMainTable", text: "保存", type: "default", code: 10 }
             ];
 
             var afterFliterAction = that.fliterActions(Actions);
@@ -1664,195 +1667,6 @@ function AppForm() {
             }
             return flowString;
         },
-        // 获取流程监控的数据
-        getMonitorLists: function (WorkInfoID, callback) {
-            var that = this;
-            if (!WorkInfoID) {
-                mui.alert("WorkInfoID不可以为空");
-                return false;
-            }
-
-            //获取流程意见
-            var CurrentInfo = {
-                SubOperate: "ReadConfig",
-                Current: {
-                    WorkInfoID: WorkInfoID
-                },
-                FlowOperate: appFlowsEnums.EFlowOperate.ShowMonitor
-            };
-
-            var msg = {
-                MessageCode: "Power.WorkFlows.Actions.RecvFlowOperate",
-                data: CurrentInfo
-            };
-
-            var params = {
-                json: JSON.stringify(msg)
-            };
-
-            that._APIAjax(params, function (data) {
-                var getData = JSON.parse(data);
-                if (!getData.success) {
-                    mui.alert(getData.message);
-                    return false;
-                }
-                if (callback) {
-                    callback(getData.data.ResultInfo);
-                }
-
-            }, "/API/APIMessage");
-        },
-        // 整合监控数据
-        checkMonitorDataList: function (isEnd, histortMind, callback) {
-            console.log(histortMind);
-            var that = this;
-            var dataArray = [];
-            for (var i = 0; i < histortMind.length; i++) {
-                var tmp = {};
-                var item = histortMind[i];
-                //隐藏的记录暂时不显示
-                if (item.InboxStatus == appFlowsEnums.EFlowInboxStatus.Hidden) {
-                    continue;
-                }
-                //流程还未结束，发送到结束节点的不显示
-                if (isEnd == false && item.ActName == "结束") {
-                    continue;
-                }
-                //忽略自动跳过的意见
-                if (item.InboxStatus == appFlowsEnums.EFlowInboxStatus.WorkStop) {
-                    continue;
-                }
-                //如果当前是结束节点，但是前面还有非结束节点，忽略
-                if (item.ActName == "结束") {
-                    for (var j = 0; j < i; j++) {
-                        if (histortMind[j].ActName != "结束") {
-                            break;
-                        }
-                    }
-                    if (j != i) {
-                        continue;
-                    }
-                }
-
-                //如果是办结操作，则无视掉
-                if (typeof (item["FlowOperate"]) != "undefined" && item.FlowOperate ==
-                    appFlowsEnums.EFlowOperate.EndFlow) {
-                    continue;
-                }
-                if (item.Alias != "MindRecord") {
-                    continue;
-                }
-
-                tmp.time = item.MindDate.replace("年", '/').replace("月", '/').replace("日", '/');
-                tmp.role = item.DeptPositionName;
-                tmp.name = item.UserName;
-
-                for (var iTmp = 0, len = histortMind.length; iTmp < len; iTmp++) {
-                    if (histortMind[iTmp].BeforeSequeID == item.SequeID) {
-                        tmp.opt = that.getOperate(histortMind[iTmp]);
-                        break;
-                    }
-                }
-
-                tmp.opt = tmp.opt == undefined ? "" : tmp.opt;
-                if (tmp.opt == "驳回") {
-                    tmp.static = "reject";
-                } else {
-                    tmp.static = "agree";
-                }
-
-                if (item.ActName == "结束" && tmp.opt == "") {
-                    tmp.opt = "结束";
-                } else if (item.InboxStatus == appFlowsEnums.EFlowInboxStatus.WorkEnd) {
-                    tmp.text = '意见: ' + (item.Content ==
-                        "" ? "同意" : item.Content);
-                } else if (item.InboxStatus == appFlowsEnums.EFlowInboxStatus.WaitingSign) {
-                    tmp.text = "等候签收"
-                } else if (item.InboxStatus == appFlowsEnums.EFlowInboxStatus.Normal) {
-                    tmp.text = "正在办理";
-                } else {
-                    tmp.text = '意见:' + (item.Content ==
-                        "" ? "同意" : item.Content);
-                }
-                dataArray.push(tmp);
-            }
-
-            if (callback) {
-                console.log(dataArray);
-                callback(dataArray);
-            }
-        },
-        // 监控数据的渲染模板
-        monitorDataTemp: function (data) {
-            if (!data || !data.length) {
-                return false;
-            }
-            var html = '';
-            data.forEach(function (item, index) {
-                html += '<li class="mui-table-view-cell monitor-unit">' +
-                    '<div class="list_monitor-wrap">' +
-                    '<div class="list-monitor-title">' +
-                    '<div class="list-monitor-icon"></div>' +
-                    '<div class="time-tag">' +
-                    '<span>' + item.time + '</span>' +
-                    '</div>' +
-                    '</div>' +
-                    '<div class="list-monitor-content">' +
-                    '<div class="monitor-line monitor-role">' +
-                    '<span>' +
-                    '<span>' + item.role + ': </span>' +
-                    '<span>' + item.name + '</span>' +
-                    '</span>' +
-                    '<span class="mui-pull-right">' + item.opt + '</span>' +
-                    '</div>' +
-                    '<div class="monitor-line monitor-text">' +
-                    '<span>' + item.text + '</span>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '</li>';
-            });
-
-            $("#lists_monitor").html(html);
-        },
-        // 触发送审流程
-        showActionFlow: function (data, flowOperate) {
-            var url = "/Form/OpenURL?url=/Apps/workflow/WorkNodeSelect.html?KeyWord="
-                + data.KeyWord
-                + "&KeyValue=" + data.KeyValue
-                + "&FormID=" + data.FormId
-                + "&flowOperate=" + flowOperate;
-
-            appPhysical.OpenWebView(url, "流程审批");
-        },
-        // 触发同意流程
-        showSendFlow: function (data, flowOperate) {
-            var url = "/Form/OpenURL?url=/Apps/workflow/WorkNodeSelect.html?WorkInfoID="
-                + data.WorkInfoID
-                + "&SequeID=" + data.SequeID
-                + "&flowOperate=" + flowOperate;
-
-            appPhysical.OpenWebView(url, "流程审批");
-        },
-        showReturnFlow: function (data, flowOperate) {
-            var url = "/Form/OpenURL?url=/Apps/workflow/WorkReturnSelect.html?WorkInfoID="
-                + data.WorkInfoID
-                + "&SequeID=" + data.SequeID
-                + "&flowOperate=" + flowOperate;
-
-            appPhysical.OpenWebView(url, "流程审批");
-        },
-        //选择流程
-        selectWorkFlow: function (flowOperate) {
-            var url = "/Form/OpenURL?url=/Apps/workflow/WorkNodeSelect.html?KeyWord="
-                + formconfig.config.joindata.KeyWord
-                + "&KeyValue=" + formconfig.KeyValue
-                + "&FormID=" + FormId
-                + "&flowOperate="
-                + flowOperate;
-
-            appPhysical.OpenWebView(url, "流程审批");
-        },
         // 处理送审的参数
         checkActivesParams: function (params, flowOperate, callback) {
             var that = this;
@@ -1892,48 +1706,6 @@ function AppForm() {
                 callback(dataStatus, postInfo);
             }
         },
-        // 回收参数处理
-        checkGetBackParams: function (params, flowOperate, callback) {
-            var that = this;
-            var data = that.flowSaveValid(params);
-            var result = JSON.parse(data.jsonData);
-            var current = that.getFlowParameter();
-
-            if (!data.params) {
-                data.params = {};
-            }
-
-            //设置以流程参与人模式触发保存,外部规定
-            data.params.IsWorkFlowHuman = 1;
-
-            var formData = {};
-            formData.Current = current;
-
-            var msg = {};
-            msg.MessageCode = "Power.Controls.PMS.SaveWebForm";
-            msg.data = formData;
-            msg.data.FlowOperate = flowOperate;
-
-            if (flowOperate == "GetBack") {
-                msg.MessageCode = "Power.WorkFlows.Actions.RecvFlowOperate";
-            }
-
-            if (!postInfo) {
-                postInfo = {};
-            };
-            //开启事务
-            postInfo.OpenTrans = "true";
-            //要保存的数据包
-            postInfo[flowOperate] = msg;
-
-            dataStatus[flowOperate] = {};
-            //数据已经准备完毕
-            dataStatus[flowOperate].Complete = true;
-
-            if (callback) {
-                callback(dataStatus, postInfo);
-            }
-        },
         // 获取送审的参数
         getFlowParameter: function () {
             var data = {
@@ -1941,7 +1713,8 @@ function AppForm() {
                 KeyValue: formConfig.KeyValue,
                 KeyWord: formConfig.config.joindata.KeyWord,
                 WorkInfoID: workflowdata.CanFlowOperate.WorkInfoID,
-                SequeID: workflowdata.CanFlowOperate.SequeID
+                SequeID: workflowdata.CanFlowOperate.SequeID,
+                FormState: FormState
             };
 
             if (!data.KeyValue) {
@@ -1960,36 +1733,7 @@ function AppForm() {
         // 流程绑定事件
         workflowEvents: function () {
             var that = this;
-
-            // 监控
-            $("#workFlow_action_ShowMonitor").on("tap", function () {
-                if (!formConfig.FormId ||
-                    !formConfig.KeyValue) {
-                    mui.alert("FormId和KeyValue不能为空");
-                    return false;
-                }
-                var data = that.getFlowParameter();
-
-                that.toggleActionSheet();
-                that.getMonitorLists(data.WorkInfoID, function (ResultInfo) {
-                    var histortMind = ResultInfo.HistoryMind;
-                    //整个流程是否已结束时
-                    var isEnd = true;
-                    var node;
-                    for (var i = 0; i < histortMind.length; i++) {
-                        node = histortMind[i];
-                        if (node.InboxStatus == (20 || 40)) {
-                            isEnd = false;
-                            break;
-                        }
-                    }
-
-                    that.checkMonitorDataList(isEnd, histortMind, function (data) {
-                        that.monitorDataTemp(data);
-                        $(".monitor-content").addClass("move-animation-back").removeClass("move-animation-start");
-                    });
-                });
-            });
+            var flowAction = new WorkFlowAction();
             // 送审
             $("#workFlow_action_Active").on("tap", function () {
                 if (!formConfig.FormId ||
@@ -2003,10 +1747,14 @@ function AppForm() {
                 that.checkActivesParams(null, "Update", function (dataStatus, postInfo) {
                     that.saveFormWorkFlow(dataStatus, postInfo, function (returnData) {
                         var getData = JSON.parse(returnData);
-
                         if (getData.success) {
                             mui.toast("保存成功");
-                            that.showActionFlow(data, "Active");
+                            flowAction.Active({
+                                FormId: data.FormId,
+                                KeyWord: data.KeyWord,
+                                KeyValue: data.KeyValue,
+                                flowOperate: 'Active'
+                            });
                         } else {
                             mui.alert(getData.message);
                             return false;
@@ -2030,7 +1778,13 @@ function AppForm() {
 
                         if (getData.success) {
                             mui.toast("保存成功");
-                            that.showSendFlow(data, "Send");
+                            flowAction.Agree({
+                                WorkInfoID: data.WorkInfoID,
+                                FormId: data.FormId,
+                                KeyWord: data.KeyWord,
+                                KeyValue: data.KeyValue,
+                                SequeID: data.SequeID
+                            });
                         } else {
                             mui.alert(getData.message);
                             return false;
@@ -2038,6 +1792,27 @@ function AppForm() {
                     });
                 });
             });
+
+            // 监控
+            $("#workFlow_action_ShowMonitor").on("tap", function () {
+                if (!formConfig.FormId ||
+                    !formConfig.KeyValue) {
+                    mui.alert("FormId和KeyValue不能为空");
+                    return false;
+                }
+                var data = that.getFlowParameter();
+                that.toggleActionSheet();
+                flowAction.Monitor({
+                    WorkInfoID: data.WorkInfoID,
+                    flowOperate: "ShowMonitor"
+                });
+            });
+            // 监控历史
+            $("#workFlow_action_ShowHistoryMonitor").on("tap", function() {
+                that.toggleActionSheet();
+                flowAction.MonitorHistory({});
+            });
+
             // 驳回
             $("#workFlow_action_Return").on("tap", function () {
                 if (!formConfig.FormId ||
@@ -2051,10 +1826,14 @@ function AppForm() {
                 that.checkActivesParams(null, "Update", function (dataStatus, postInfo) {
                     that.saveFormWorkFlow(dataStatus, postInfo, function (returnData) {
                         var getData = JSON.parse(returnData);
-
                         if (getData.success) {
                             mui.toast("保存成功");
-                            that.showReturnFlow(data, "Return");
+                            flowAction.Return({
+                                FormId: data.FormId,
+                                KeyValue: data.KeyValue,
+                                KeyWord: data.KeyWord,
+                                SequeID: data.SequeID
+                            });
                         } else {
                             mui.alert(getData.message);
                             return false;
@@ -2062,6 +1841,64 @@ function AppForm() {
                     });
                 });
             });
+
+            // 委派
+            $("#workFlow_action_Delegate").on("tap", function () {
+                if (!formConfig.FormId ||
+                    !formConfig.KeyValue) {
+                    mui.alert("FormId和KeyValue不能为空");
+                    return false;
+                }
+                var data = that.getFlowParameter();
+                that.toggleActionSheet();
+                that.checkActivesParams(null, "Update", function (dataStatus, postInfo) {
+                    that.saveFormWorkFlow(dataStatus, postInfo, function (returnData) {
+                        var getData = JSON.parse(returnData);
+                        if (getData.success) {
+                            mui.toast("保存成功");
+                            flowAction.Delegate({
+                                FormId: data.FormId,
+                                KeyWord: data.KeyWord,
+                                KeyValue: data.KeyValue,
+                                SequeID: data.SequeID,
+                                FormState: data.FormState
+                            });
+                        } else {
+                            mui.alert(getData.message);
+                            return false;
+                        }
+                    });
+                });
+            });
+            // 委派处理
+            $("#workFlow_action_Delegateing").on("tap", function () {
+                if (!formConfig.FormId ||
+                    !formConfig.KeyValue) {
+                    mui.alert("FormId和KeyValue不能为空");
+                    return false;
+                }
+                var data = that.getFlowParameter();
+                that.toggleActionSheet();
+                that.checkActivesParams(null, "Update", function (dataStatus, postInfo) {
+                    that.saveFormWorkFlow(dataStatus, postInfo, function (returnData) {
+                        var getData = JSON.parse(returnData);
+                        if (getData.success) {
+                            mui.toast("保存成功");
+                            flowAction.Delegating({
+                                FormId: data.FormId,
+                                KeyWord: data.KeyWord,
+                                KeyValue: data.KeyValue,
+                                SequeID: data.SequeID,
+                                FormState: data.FormState
+                            });
+                        } else {
+                            mui.alert(getData.message);
+                            return false;
+                        }
+                    });
+                });
+            });
+
             // 回收
             $("#workFlow_action_GetBack").on("tap", function () {
                 if (!formConfig.FormId ||
@@ -2072,13 +1909,34 @@ function AppForm() {
                 var data = that.getFlowParameter();
 
                 that.toggleActionSheet();
-                that.checkGetBackParams(null, "GetBack", function (dataStatus, postInfo) {
+                flowAction.GetBack({
+                    FormId: data.FormId,
+                    FormState: data.FormState,
+                    KeyValue: data.KeyValue,
+                    KeyWord: data.KeyWord,
+                    SequeID: data.SequeID
+                });
+            });
+            // 终止
+            $("#workFlow_action_Stop").on("tap", function () {
+                if (!formConfig.FormId ||
+                    !formConfig.KeyValue) {
+                    mui.alert("FormId和KeyValue不能为空");
+                    return false;
+                }
+                var data = that.getFlowParameter();
+                that.toggleActionSheet();
+                that.checkActivesParams(null, "Update", function (dataStatus, postInfo) {
                     that.saveFormWorkFlow(dataStatus, postInfo, function (returnData) {
                         var getData = JSON.parse(returnData);
                         if (getData.success) {
-                            mui.toast("撤回成功");
-                            window.location.href = "/Form/ValidForm/"
-                                + FormId + "/" + formConfig.FormState + "/" + formConfig.KeyValue + "/";
+                            mui.toast("保存成功");
+                            flowAction.Stop({
+                                FormId: data.FormId,
+                                KeyWord: data.KeyWord,
+                                KeyValue: data.KeyValue,
+                                SequeID: data.SequeID
+                            });
                         } else {
                             mui.alert(getData.message);
                             return false;
@@ -2892,7 +2750,7 @@ function AppForm() {
         load: function (options, callback) {
             var that = this;
             config = that.getConfig(formConfig.config.joindata.KeyWord);
-
+            localStorage.setItem("current_workflowdata", JSON.stringify(workflowdata));
             // 获取自定义的配置
             optionDiy = options;
 
@@ -2930,6 +2788,7 @@ function AppForm() {
                     mui.alert('主表数据为空', '警告');
                 }
             });
+
         }
     }
 }
