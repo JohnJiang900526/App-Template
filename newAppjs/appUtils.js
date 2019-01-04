@@ -203,6 +203,10 @@ var Util = {
     // "yyyy-MM-dd HH:mm:ss";"yyyy-MM-dd-HH-mm-ss"
     // "yyyy-MM-ddTHH:mm:ss" ....
     _formatDate: function (time, format) {
+        if (time.indexOf("T") > -1) {
+            time = time.replace("T", " ")
+        }
+
         var t = new Date(time);
         if (t.getTime() == 0) {
             t = new Date();
@@ -211,6 +215,7 @@ var Util = {
         var tf = function (i) {
             return (i < 10 ? '0' : '') + i;
         };
+        
         if (!format) {
             format = "yyyy-MM-dd";
         }
