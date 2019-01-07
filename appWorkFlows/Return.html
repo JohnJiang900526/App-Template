@@ -233,17 +233,15 @@
             var UserLists = NextNodeList.find(".user-lists");
             var UserListsInput = UserLists.find("input.user-list");
             
-            if (NextNodeList.size() == 1) {
-              $this.prop("checked", true);
+            if (checked) {
               if (UserListsInput.size() == 1) {
-                UserListsInput.prop("checked", true);
-              }
-            } else {
-              if (checked) {
-                UserListsInput.prop("checked", true);
+                UserListsInput.prop("checked", true);  
               } else {
                 UserListsInput.prop("checked", false);
               }
+              NextNodeList.siblings().find("input").prop("checked", false);
+            } else {
+              UserListsInput.prop("checked", false);
             }
           });
 
