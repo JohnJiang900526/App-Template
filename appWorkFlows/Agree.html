@@ -707,22 +707,18 @@
             judgeIsByDraft: function (currentSelectNodeList) {
                 var that = this;
                 var IsAllPass = that.getData("NextNodeListResult").IsAllPass;
-                if (IsAllPass) {
-                    var SendUserMode = currentSelectNodeList.SendUserMode;
-                    var ESendUserMode = appFlowsEnums.ESendUserMode;
+                var SendUserMode = currentSelectNodeList.SendUserMode;
+                var ESendUserMode = appFlowsEnums.ESendUserMode;
 
-                    switch (SendUserMode) {
-                        case ESendUserMode.Normal:
-                            return false;
-                        case ESendUserMode.ByDraft:
-                            return true;
-                        case ESendUserMode.BySendUser:
-                            return true;
-                        default:
-                            return false;
-                    }
-                } else {
-                    return false;
+                switch (SendUserMode) {
+                    case ESendUserMode.Normal:
+                        return false;
+                    case ESendUserMode.ByDraft:
+                        return true;
+                    case ESendUserMode.BySendUser:
+                        return true;
+                    default:
+                        return false;
                 }
             },
             //判断选择人员的时候 要显示什么名称
