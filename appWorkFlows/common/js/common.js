@@ -55,7 +55,7 @@ function WorkFlowCommon () {
           '<div class="mui-loading-main">' +
           '<h3 class="title">' + Etitle + '</h3>' +
           '<div class="loading-wrap">' +
-          '<img src="./common/img/loading.gif" alt="loading">' +
+          '<img src="/Apps/appWorkFlows/common/img/loading.gif" alt="loading">' +
           '</div>' +
           '</div>' +
           '</div>' +
