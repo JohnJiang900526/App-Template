@@ -480,6 +480,10 @@
                         IsMindMustInput: item.IsMindMustInput
                     });
 
+                    var display = "";
+                    if (item.IsMustNotUsers) {
+                        display = "none";
+                    }
                     var NodeMode = that.checkNextNodeListSelect(item, data);
                     var checked = NodeMode.checked ? 'checked' : '';
                     var disabled = NodeMode.disabled ? 'disabled' : '';
@@ -494,11 +498,11 @@
                         '<input '+ checked +' name="checkbox" '+ disabled +' class="node-title" type="checkbox">' +
                         '</div>' +
                         '<div class="user-contents">' +
-                        '<div class="user-list-conetnt">' +
+                        '<div style="display: '+ display +'" class="user-list-conetnt">' +
                         '<h3 class="user-list-title"><span>可送审人员</span>'+ that.defineShowName(item,judgeIsByDraft, "CanSend") +'</h3>' +
                         '<div class="user-lists">'+ that.renderUserList(item, 'CanSend') +'</div>' +
                         '</div>' +
-                        '<div class="user-list-conetnt">' +
+                        '<div style="display: '+ display +'" class="user-list-conetnt">' +
                         '<h3 class="user-list-title"><span>可抄送人员</span></h3>' +
                         '<div class="user-lists">'+ that.renderUserList(item, 'CanCopy') +'</div>' +
                         '</div>' +
