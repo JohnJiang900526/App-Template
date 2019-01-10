@@ -104,6 +104,18 @@
           line-height: 18px;
           font-size: 14px;
         }
+
+        .monitor-content .action-wrap {
+          flex: 0 0 45px;
+          width: 100%;
+          position: relative;
+        }
+
+        .monitor-content .action-wrap .action-item {
+          font-size: 14px;
+          text-align: center;
+          line-height: 45px;
+        }
     </style>
 </head>
 <body>
@@ -124,6 +136,9 @@
       </div>
       <div id="monitorLists" class="monitor-lists-wrap"></div>
     </div>
+    <div class="action-wrap top-line">
+      <div id="back" class="action-item">返回</div>
+    </div>
   </div>
 </body>
 <script src="/Apps/js/mui/js/mui.picker.min.js?v=6" type="text/javascript"></script>
@@ -138,6 +153,7 @@
       var monitorObj = {
         init: function () {
           this.events();
+          this.UIEvents();
         },
         data: {
           query: {
@@ -147,6 +163,27 @@
           ResultInfo: {},
           HistoryMind: []
         },
+        UIEvents: function () {
+          var that = this;
+
+          $("#back").on("tap", function () {
+            var query = that.getData("query");
+            if (query.plat && query.plat == "wechat") {
+              if (window.parent) {
+                var closeWorkFlowWrap = window.parent.closeWorkFlowWrap;
+                if (closeWorkFlowWrap) {
+                  closeWorkFlowWrap();
+                } else {
+                  that.back();
+                }
+              } else {
+                that.back();
+              }
+            } else {
+              that.back();
+            }
+          });
+        },
         // 给data里面赋值
         setData: function (obj) {
           this.data = $.extend(this.data, obj);
@@ -154,6 +191,16 @@
         // 获取data里面值
         getData: function (name) {
           return this.data[name];
+        },
+        // 返回
+        back:function () {
+          if (window.m3app && window.m3app.AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else if (window.PowerM3AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else {
+            window.history.go("-1");
+          }
         },
         // 节点的状态
         formatInboxStatus (node) {

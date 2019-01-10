@@ -60,6 +60,18 @@
         .item-list-msg .text {
           color: rgba(0, 0, 0, 0.6);
         }
+
+        .monitor-content .action-wrap {
+          flex: 0 0 45px;
+          width: 100%;
+          position: relative;
+        }
+
+        .monitor-content .action-wrap .action-item {
+          font-size: 14px;
+          text-align: center;
+          line-height: 45px;
+        }
     </style>
 </head>
 <body>
@@ -68,6 +80,9 @@
       监控历史:
     </div>
     <div id="historyLists" class="history-lists-wrap">
+    </div>
+    <div class="action-wrap top-line">
+      <div id="back" class="action-item">返回</div>
     </div>
   </div>
 </body>
@@ -193,6 +208,34 @@
             return false;
           }
         },
+        // 返回
+        back:function () {
+          if (window.m3app && window.m3app.AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else if (window.PowerM3AppCall) {
+            CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+          } else {
+            window.history.go("-1");
+          }
+        },
+        backLastPage: function () {
+          var that = this;
+          var query = that.getData("query");
+          if (query.plat && query.plat == "wechat") {
+            if (window.parent) {
+            var closeWorkFlowWrap = window.parent.closeWorkFlowWrap;
+              if (closeWorkFlowWrap) {
+                closeWorkFlowWrap();
+              } else {
+                that.back();
+              }
+            } else {
+              that.back();
+            }
+          } else {
+            that.back();
+          }
+        },
         // UI事件
         UIEvents: function () {
           var that = this;
@@ -206,6 +249,10 @@
               flowOperate: "ShowMonitor"
             });
             appPhysical.OpenWebView(url, "流程监控");
+          });
+          
+          $("#back").on("back", function() {
+            that.backLastPage();
           });
         },
         events: function () {

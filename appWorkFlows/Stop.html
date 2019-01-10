@@ -172,7 +172,7 @@
           flowCommon.getAPIMessages(params, function (res) {
             flowCommon.hideLoading();
             flowCommon.showToast("提交完成，准备跳转...", function () {
-              that.back();
+              that.backLastPage();
             });
           }, function (err) {
             flowCommon.hideLoading();
@@ -189,6 +189,24 @@
             window.history.go("-1");
           }
         },
+        backLastPage: function () {
+          var that = this;
+          var query = that.getData("query");
+          if (query.plat && query.plat == "wechat") {
+            if (window.parent) {
+            var closeWorkFlowWrap = window.parent.closeWorkFlowWrap;
+              if (closeWorkFlowWrap) {
+                closeWorkFlowWrap();
+              } else {
+                that.back();
+              }
+            } else {
+              that.back();
+            }
+          } else {
+            that.back();
+          }
+        },
         // UI事件
         UIEvents: function () {
           var that = this;
@@ -202,7 +220,7 @@
                 that.submitStopData();
                 break;
               case "back":
-                that.back();
+                that.backLastPage();
                 break;
               default: 
                 return false;

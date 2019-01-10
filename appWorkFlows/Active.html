@@ -334,7 +334,7 @@
                             that.ToUpStep("NodeList");
                             break;
                         case 'LastPage':
-                            that.back();
+                            that.backLastPage();
                             break;
                         case 'WorkFlow':
                             that.ToUpStep("WorkFlow");
@@ -851,7 +851,7 @@
                 flowCommon.getAPIMessage(params, function(res) {
                     flowCommon.hideLoading();
                     flowCommon.showToast("提交完成，准备跳转...", function () {
-                        that.back();
+                        that.backLastPage();
                     });
                 }, function (err) {
                     flowCommon.hideLoading();
@@ -860,13 +860,31 @@
             },
             // 返回
             back:function () {
-            if (window.m3app && window.m3app.AppCall) {
-                CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
-            } else if (window.PowerM3AppCall) {
-                CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
-            } else {
-                window.history.go("-1");
-            }
+                if (window.m3app && window.m3app.AppCall) {
+                    CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+                } else if (window.PowerM3AppCall) {
+                    CallAppFunction("appCloseNewWebView", '{"reload":"true"}', "");
+                } else {
+                    window.history.go("-1");
+                }
+            },
+            backLastPage: function () {
+                var that = this;
+                var query = that.getData("query");
+                if (query.plat && query.plat == "wechat") {
+                    if (window.parent) {
+                        var closeWorkFlowWrap = window.parent.closeWorkFlowWrap;
+                        if (closeWorkFlowWrap) {
+                            closeWorkFlowWrap();
+                        } else {
+                        that.back();
+                        }
+                    } else {
+                        that.back();
+                    }
+                } else {
+                    that.back();
+                }
             },
             // 获取选择的数据
             getSelectedNode: function () {
