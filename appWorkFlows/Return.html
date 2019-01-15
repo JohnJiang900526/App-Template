@@ -441,6 +441,7 @@
           
           nextLodeList.each(function () {
             var $NextNodeList = $(this);
+            var checked = $NextNodeList.find(".next-node-list-input").prop("checked");
             var obj = {
               NodeCode: $NextNodeList.attr("data-code"),
               NodeName: $NextNodeList.attr("data-name"),
@@ -484,7 +485,9 @@
               obj.ItemList.push(ItemListObj);
             });
 
-            arr.push(obj);
+            if (checked) {
+              arr.push(obj);
+            }
           });
 
           return arr;
