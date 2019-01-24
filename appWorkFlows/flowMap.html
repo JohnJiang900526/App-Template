@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>流程图</title>
+    <link href="/Apps/js/mui/css/mui.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/appWorkFlows/common/css/reset.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/Apps/js/mui/css/mui.picker.min.css?v=6" rel="stylesheet" type="text/css" />
+    <link href="/PowerPlat/WorkFlows/Design/js/GooFlow/GooFlow/codebase/GooFlow2.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/PowerPlat/WorkFlows/Design/js/GooFlow/default.css" />
+    <link href="/Apps/appWorkFlows/common/css/common.css?v=6" rel="stylesheet" type="text/css" />
+    <script src="/Apps/js/jquery-1.8.3.min.js?v=6" type="text/javascript"></script>
+    <script src="/Apps/js/mui/js/mui.min.js?v=6" type="text/javascript"></script>
+    <style>
+        .monitor-content {
+          height: 100%;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          background-color: #ffffff;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .flow-map {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          z-index: 1000;
+          top: 0;
+          left: 0;
+          background-color: #ffffff;
+          display: flex;
+          flex-direction: column;
+        }
+        .flow-map .flow-map-content{
+          width: 100%;
+          height: 100%;
+        }
+        
+
+        .user-list-wrap {
+          width: 100%;
+          min-width: 100px;
+          background-color: transparent;
+          position: relative;
+          display: none;
+        }
+
+        .user-list-wrap .user-list-inner {
+          position: absolute;
+          top:20px;
+          left: 0;
+          width: 100%;
+          background-color: teal;
+          padding: 5px;
+          border-radius: 5px;
+        }
+
+        .user-list-inner .user-inner-item {
+          padding: 3px 0;
+          font-size: 14px;
+          color: #ffffff;
+        }
+
+        .GooFlow_work, .GooFlow {
+          border: none;
+          margin: 0!important;
+          background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+  <div class="monitor-content">
+    <div id="FlowMapWrap" class="flow-map">
+      <div id="flowmap" class="flow-map-content"></div>
+    </div>
+  </div>
+</body>
+<script src="/Apps/js/mui/js/mui.picker.min.js?v=6" type="text/javascript"></script>
+<script src="/Apps/newAppjs/appUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appPhysicalUtils.js?v=6"></script>
+<script src="/Apps/newAppjs/appFlowsEnums.js?v=6"></script>
+<script src="/Apps/appWorkFlows/common/js/common.js?v=6"></script>
+
+<script src="/PowerPlat/WorkFlows/Design/js/GooFlow/GooFunc.js"></script>
+<script src="/PowerPlat/WorkFlows/Design/js/GooFlow/json2.js"></script>
+<script src="/PowerPlat/WorkFlows/Design/js/GooFlow/GooFlow/codebase/GooFlow.js"></script>
+<script src="/PowerPlat/WorkFlows/Design/js/GooFlow/GooFlow/codebase/GooFlow_color.js"></script> 
+
+<script type="text/javascript">
+    $(function() {
+      var MESSAGECODE = "Power.WorkFlows.Actions.RecvFlowOperate";
+      var flowCommon = new WorkFlowCommon();
+      var monitorObj = {
+        init: function () {
+          this.events();
+          this.UIEvents();
+        },
+        data: {
+          query: {
+            WorkInfoID: '',
+            flowOperate: ''
+          },
+          ResultInfo: {},
+          HistoryMind: []
+        },
+        UIEvents: function () {
+          var that = this;
+
+          $("#flowmap").on("tap", ".GooFlow_item", function() {
+            var $this = $(this);
+            var userList = $this.find(".user-list-wrap");
+
+            $this.siblings().find(".user-list-wrap").hide();
+
+            if (userList.size() > 0) {
+              userList.toggle();
+            } else {
+              return false;
+            }
+          });
+        },
+        // 给data里面赋值
+        setData: function (obj) {
+          this.data = $.extend(this.data, obj);
+        },
+        // 获取data里面值
+        getData: function (name) {
+          return this.data[name];
+        },
+        // 获取流程数据
+        getMonitorData: function (callback) {
+          var that = this;
+          var obj = {
+            MessageCode: MESSAGECODE,
+            data: {
+              SubOperate: "ReadConfig",
+              Current: {
+                WorkInfoID: that.getData("query").WorkInfoID
+              },
+              FlowOperate: that.getData("query").flowOperate
+            }
+          };
+          var params = {
+            json: JSON.stringify(obj)
+          };
+
+          flowCommon.showLoading();
+          flowCommon.getAPIMessage(params, function (res) {
+            flowCommon.hideLoading();
+            that.setData({
+              ResultInfo: $.extend({}, res.ResultInfo),
+              HistoryMind: res.ResultInfo.HistoryMind || []
+            });
+
+            callback && callback();
+          }, function (err) {
+            flowCommon.hideLoading();
+            mui.alert(err);
+          });
+        },
+        events: function () {
+          var that = this;
+          that.setData({
+            query: flowCommon.getQuery()
+          });
+
+          that.getMonitorData(function() {
+            var flowmap = $("#flowmap");
+            var width = flowmap.width();
+            var height = flowmap.height();
+            var flowObject = $.createGooFlow($("#flowmap"), {
+                width: width,
+                height: height,
+                toolBtns: ["start round", "end round", "task round", "node", "join", "fork"],
+                haveHead: false,
+                haveTool: false,
+                useOperStack: true
+            });
+
+            var flowData = that.getData("ResultInfo")["JsonInfo"];
+
+            $.each(flowData.NodeList, function () {
+                this.id = this.NodeCode;
+                this.name = this.NodeName;
+                this.title = this.NodeName;
+                this.type = this.NodeType;
+                this.allowDraggable = true;//允许拖曳
+                if (this.type == "StartNode") {
+                  this.type = "start round"
+                };
+                if (this.type == "EndNode") {
+                  this.type = "end round"
+                };
+            });
+
+            $.each(flowData.LineList, function () {
+                this.id = this.LineCode;
+                if (this.LineName) this.name = this.LineName;
+                this.title = this.LineName;
+                this.from = this.FromNode;
+                this.to = this.ToNode;
+            });
+
+            flowObject.loadData(flowData);
+
+            $.each(flowData.LineList, function () {
+                if (this.IsDisabled == false) return;  //如果是被禁用的连线，则不显示                         
+                var lineObj = $(flowObject.$lineDom[this.id])[0];
+                lineObj.style.display = "none";
+            });
+            var historyNodeList = that.getData("ResultInfo")["HistoryNodeList"];
+            historyNodeList = JSON.parse(historyNodeList);
+            $.each(historyNodeList, function () {
+                var fromNodeCode = (this + "").split(":")[1];
+                var nodeCode = (this + "").split(":")[0];
+
+                if (fromNodeCode) {
+                    flowObject.markItem(fromNodeCode, "node", true);
+                }
+                //结束节点也应该标红
+                if (nodeCode && nodeCode != "" && flowObject.$nodeData[nodeCode] && flowObject.$nodeData[nodeCode]["NodeType"] == "EndNode") {
+                  flowObject.markItem(nodeCode, "node", true);
+                }
+            });
+
+            var currentNodeList = that.getData("ResultInfo")["CurrentNodeList"];
+            var currentNodeList = JSON.parse(currentNodeList);
+            $.each(currentNodeList, function () {
+                var fromNodeCode = (this + "").split(":")[0];
+                if (!fromNodeCode) return;
+
+                flowObject.markItem(fromNodeCode, "node", true);
+                $(flowObject.$nodeDom[fromNodeCode]);
+            });
+
+            for (var iTmp = 0; iTmp < historyNodeList.length; iTmp++) {
+                var str = historyNodeList[iTmp];
+                var lineCode = (str + "").split(":")[2];
+                if (!lineCode) continue;
+                flowObject.markItem(lineCode, "line", true);
+            }
+
+
+            var NodeUserList = that.getData("ResultInfo")["NodeUserList"];
+            var NodeUserList = JSON.parse(NodeUserList);
+            var EFlowInboxStatus = appFlowsEnums.EFlowInboxStatus;
+            $('.GooFlow_item').each(function() {
+              var ctrlId = $(this).attr("id");
+              var nodeData = flowObject.$nodeData[ctrlId];
+
+              var nodeUserList = $.grep(NodeUserList, function (m) {
+                  return typeof (m.NodeCode) != "undefined" && m.NodeCode == ctrlId;
+              });
+
+              if (!nodeUserList) return;
+              if (nodeUserList.length == 0) return;
+              if (nodeUserList.length == 1 && nodeUserList[0].UserList.length == 0) return;
+
+              var _html = [];
+              _html.push("<div class='user-list-wrap'>");
+              $.each(nodeUserList, function () {
+                  $.each(this.UserList, function () {
+                      _html.push("<div class='user-list-inner'>");
+                      _html.push("<div class='user-inner-item'><span>" + this.DeptPositionName + ":</span></div>");
+                      _html.push("<div class='user-inner-item'>");
+
+                      if (this.InboxStatus == EFlowInboxStatus.WaitingSign || this.InboxStatus == "WaitingSign") {
+                          _html.push("<span class='tooltip-user'>" + this.UserName + " [等候签收]</span>");
+                      }
+                      else if (this.InboxStatus == EFlowInboxStatus.Normal || this.InboxStatus == "Normal") {
+                          _html.push("<span class='tooltip-user'>" + this.UserName + " [已签收]</span>");
+                      }
+                      else
+                          _html.push("<span class='tooltip-user'>" + this.UserName + "</span>");
+
+                      _html.push("</div>");
+                      _html.push("</div>");
+                  });
+              });
+              $(this).append(_html.join(""));
+            });
+          });
+        }
+      };
+
+      monitorObj.init();
+    });
+</script>
+</html>
